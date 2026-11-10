@@ -202,6 +202,8 @@ export interface Settings extends Base {
   aiEnabled: boolean
   aiTone: 'gentle' | 'balanced' | 'strict'
   notifications: boolean
+  /** An "A" day, used to place A/B rotating classes. */
+  rotationStart?: LocalDate
   seeded: boolean
 }
 

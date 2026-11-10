@@ -5,7 +5,7 @@ import type { Assignment, Attendance, Hobby, Log, LocalDate, Settings } from '..
 import type { Repository } from './repository'
 
 export const DEFAULT_SETTINGS: Omit<Settings, 'createdAt' | 'updatedAt'> = {
-  id: 'main', theme: 'dark', weekStart: 0, gameEnabled: false, aiEnabled: false, aiTone: 'balanced', notifications: false, seeded: false,
+  id: 'main', theme: 'dark', weekStart: 0, gameEnabled: false, aiEnabled: false, aiTone: 'balanced', notifications: true, seeded: false,
 }
 
 export async function ensureSettings(repo: Repository): Promise<Settings> {

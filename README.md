@@ -23,14 +23,14 @@ Requires Node 20 or newer.
 | Phase | State |
 | --- | --- |
 | 1. Foundations and design system | Done: app shell, PWA, storage layer, data model, sample data, Cinematic Glass theme, Today screen |
-| 2. Assignments | Next |
-| 3. Hobbies | Planned |
+| 2. Assignments | Done: courses and assignments, quick add, Week and Month views, inbox, setup wizard, reminders, exam countdown |
+| 3. Hobbies | Next |
 | 4. Planning | Planned |
 | 5. Insights and game | Planned |
 | 6. AI, flashcards and stubs | Planned |
 | 7. Polish | Planned |
 
-Today shows live tiles from sample data: next up, due count, devotional on-time dots, a 14 day workload chart, a due-soon checklist and a hobby heatmap. Other pages (Week, School, Life, Insights) show what they will contain. Settings has theme, week start, and sample data controls.
+Today shows live tiles from sample data: next up, due count, classes today, exam countdown, devotional on-time dots, a 14 day workload chart, a due-soon checklist and a hobby heatmap. School has assignments (grouped, searchable, with subtasks), courses with weekly, block or A/B rotating schedules, a quick-capture inbox, a quick-add line ("math ch5 problems due fri 9am ~45m") and a semester setup wizard. Week and Month calendars show classes, due dates and workload. Reminders run while the app is open. Keyboard: `n` new assignment, `t` today, `/` search. Life and Insights show what they will contain.
 
 ## How it is built
 

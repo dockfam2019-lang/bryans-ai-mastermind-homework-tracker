@@ -20,6 +20,9 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 14 | Monospace is for tiny labels only | Terminal and spreadsheet designs scored 0 |
 | 15 | Widgets that scored well (Month Heat, Gantt, Pulse Chart, hobby heatmap) become tiles on multi-page screens, not whole pages | Bryan: the web app needs a lot more than one view |
 | 16 | Glass is limited per screen with solid fallbacks | Accessibility and mobile performance; see docs/UI-FEEDBACK.md |
+| 17 | Reminders are on by default and appear inside the app; system notifications are an opt-in button | Safari and mobile browsers do not deliver background notifications reliably |
+| 18 | A/B rotating classes use one setting, "first A day", and count school days (Mon to Fri) from it | Simplest rule that works without a school calendar |
+| 19 | Grades are stored as `score` and `maxScore` on each assignment instead of a separate Grade table | Fewer records; a grade is always tied to one assignment |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.

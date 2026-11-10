@@ -1,7 +1,9 @@
 import { repo } from '../../data'
 import { summarizeOnTime, recentByType } from '../../domain/attendance'
 import { addDays, DAY_SHORT, dueAt, formatCountdown, formatTime, fromLocalDate, MONTH_SHORT, relativeDay, startOfWeek, toLocalDate } from '../../domain/dates'
+import { examCards } from '../../domain/exams'
 import { loadByDay, peakDay } from '../../domain/load'
+import { classesOn } from '../../domain/schedule'
 import type { Assignment, Course } from '../../domain/types'
 import { dueOn, nextUp, openAssignments, overdue } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
@@ -21,8 +23,9 @@ export function TodayPage() {
   const attendance = useLive(() => repo.attendance.all())
   const hobbies = useLive(() => repo.hobbies.all())
   const logs = useLive(() => repo.logs.all())
+  const settings = useLive(() => repo.settings.get('main'))
 
-  if (!assignments || !courses || !attendance || !hobbies || !logs) return null
+  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings) return null
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
@@ -37,6 +40,8 @@ export function TodayPage() {
   const hobby = hobbies.find((h) => !h.archived)
   const d = fromLocalDate(today)
   const dueCount = dueToday.length + late.length
+  const classes = classesOn(courses, today, settings.rotationStart)
+  const exams = examCards(assignments, today)
 
   // hobby heat: last HEAT_WEEKS weeks, ending today, column per week
   const minutesByDate = new Map<string, number>()
@@ -95,6 +100,37 @@ export function TodayPage() {
             {devotional.map((r) => <i key={r.id} className={r.status === 'on-time' ? '' : r.status} title={`${r.localDate}: ${r.status}`} />)}
           </div>
         </section>
+
+        <section className="tile span-6" aria-label="Classes today">
+          <h2>Classes today</h2>
+          {classes.length === 0 ? <p className="sub">No classes today. Add your timetable under School, Courses.</p> : (
+            <ul className="list">
+              {classes.map(({ course, meeting }) => (
+                <li key={course.id + meeting.start}>
+                  <i className="dot big" style={{ background: course.color }} />
+                  <span className="title"><b>{course.name}</b><span className="sub">{meeting.room ?? ''}</span></span>
+                  <span className="sub">{formatTime(meeting.start)} to {formatTime(meeting.end)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {exams.length > 0 && (
+          <section className="tile span-6" aria-label="Exam countdown">
+            <h2>Exam countdown</h2>
+            {exams.slice(0, 2).map(({ assignment: a, daysLeft, stage }) => (
+              <div key={a.id} className={`exam ${stage}`}>
+                <div className="wide stat">{daysLeft}</div>
+                <div>
+                  <b>{daysLeft === 0 ? 'Exam today' : daysLeft === 1 ? 'day to go' : 'days to go'}</b>
+                  <p className="sub">{a.title}{courseOf(a) ? ` · ${courseOf(a)?.name}` : ''}</p>
+                  <p className="sub">{stage === 'upcoming' ? 'Plenty of time. A little each day.' : stage === 'soon' ? 'Time to start reviewing.' : stage === 'tomorrow' ? 'Tomorrow. Light review, then rest.' : 'You have prepared. Go.'}</p>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
 
         <section className="tile span-6" aria-label="Week load">
           <h2>Next 14 days</h2>
