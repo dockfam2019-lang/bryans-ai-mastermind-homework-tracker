@@ -6,7 +6,7 @@ Repo `dockfam2019-lang/bryans-ai-mastermind-homework-tracker` exists (private, c
 ## Decisions (from Bryan)
 - Users: Bryan plus a few partners (shared link or passcode, no full account system at first)
 - Platform: web app
-- Features: AI weekly coach, MCP access, peer/AI referee check-ins, correlation insights
+- Features: AI weekly coach, MCP access, peer/AI referee check-ins, correlation insights, on-time tracking (devotional/school), AI homework planner
 
 ## Proposed stack (confirm in Phase 0)
 Next.js + TypeScript, SQLite via Drizzle (simple, one file, easy to host), Tailwind, Claude API for the coach, a small MCP server reading the same DB. Hosted on Vercel/Fly or similar.
@@ -52,6 +52,16 @@ Next.js + TypeScript, SQLite via Drizzle (simple, one file, easy to host), Tailw
 ### Phase 7 — Polish and launch
 - Mobile layout, notifications/reminders, backups, deploy, invite partners, feedback round
 - **Done when:** the group uses it for a full week
+
+### Phase 8 — On-time tracking (devotional and school)
+- Log each devotional and school session as on time, late or absent; on-time rate, streak, calendar and weekly trend
+- **Build after Phase 2** (reuses streak and heatmap work)
+- **Done when:** each member sees their on-time rate over time
+
+### Phase 9 — AI homework planner
+- Members rate difficulty and time per assignment and log actual time; AI predicts the hardest assignments and learns which days/times each member works best, then suggests a day-by-day plan before due dates
+- **Build after Phase 5** (needs history and metrics)
+- **Done when:** the app suggests a daily order and improves as history grows
 
 ## Risks
 - AI referee and coach quality: keep humans in the loop, log prompts and outputs
