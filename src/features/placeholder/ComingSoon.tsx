@@ -12,12 +12,6 @@ const PAGES: Record<string, { title: string; blurb: string; phase: string; items
     phase: 'Phase 2 and 4',
     items: ['Add assignments with a sentence like "math ch5 problems due fri 9am ~45m"', 'Grades with custom scales', 'Attendance, including devotional on-time tracking'],
   },
-  life: {
-    title: 'Life',
-    blurb: 'Hobbies and habits with streaks that forgive a missed day.',
-    phase: 'Phase 3',
-    items: ['One-tap check-ins', 'Heatmap per hobby', 'Pause and streak freezes'],
-  },
   insights: {
     title: 'Insights',
     blurb: 'Where your time goes and when you do your best work.',

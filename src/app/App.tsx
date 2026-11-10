@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { repo } from '../data'
+import { LifePage } from '../features/life/LifePage'
 import { ComingSoon } from '../features/placeholder/ComingSoon'
 import { SchoolPage } from '../features/school/SchoolPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
@@ -54,7 +55,7 @@ function Page({ route }: { route: string }) {
     case 'settings': return <SettingsPage />
     case 'week': return <WeekPage tab={tab} />
     case 'school': return <SchoolPage tab={tab} />
-    case 'life': return <ComingSoon id="life" />
+    case 'life': return <LifePage sub={tab} />
     case 'insights': return <ComingSoon id="insights" />
     default: return <TodayPage />
   }

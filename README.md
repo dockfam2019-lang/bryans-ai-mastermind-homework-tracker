@@ -24,17 +24,17 @@ Requires Node 20 or newer.
 | --- | --- |
 | 1. Foundations and design system | Done: app shell, PWA, storage layer, data model, sample data, Cinematic Glass theme, Today screen |
 | 2. Assignments | Done: courses and assignments, quick add, Week and Month views, inbox, setup wizard, reminders, exam countdown |
-| 3. Hobbies | Next |
-| 4. Planning | Planned |
+| 3. Hobbies | Done: cadences, one-tap check-ins, forgiving streaks, freezes and vacation pause, heatmaps, stats, journal with milestones and photos |
+| 4. Planning | Next |
 | 5. Insights and game | Planned |
 | 6. AI, flashcards and stubs | Planned |
 | 7. Polish | Planned |
 
-Today shows live tiles from sample data: next up, due count, classes today, exam countdown, devotional on-time dots, a 14 day workload chart, a due-soon checklist and a hobby heatmap. School has assignments (grouped, searchable, with subtasks), courses with weekly, block or A/B rotating schedules, a quick-capture inbox, a quick-add line ("math ch5 problems due fri 9am ~45m") and a semester setup wizard. Week and Month calendars show classes, due dates and workload. Reminders run while the app is open. Keyboard: `n` new assignment, `t` today, `/` search. Life and Insights show what they will contain.
+Today shows live tiles from sample data: next up, due count, classes today, exam countdown, devotional on-time dots, a 14 day workload chart, a due-soon checklist and a hobby heatmap. School has assignments (grouped, searchable, with subtasks), courses with weekly, block or A/B rotating schedules, a quick-capture inbox, a quick-add line ("math ch5 problems due fri 9am ~45m") and a semester setup wizard. Week and Month calendars show classes, due dates and workload. Reminders run while the app is open. Keyboard: `n` new assignment, `t` today, `/` search. Life has hobby cards with streaks that survive one missed day, a year heatmap, per-hobby stats, a journal with milestones and progress photos, and a vacation pause. Insights shows what it will contain.
 
 ## How it is built
 
-- `src/domain/` pure logic with tests: local dates, workload, attendance, upcoming
+- `src/domain/` pure logic with tests: local dates, streaks, hobby stats, quick add parsing, schedules, reminders, workload, attendance
 - `src/data/` repository interfaces plus a Dexie (IndexedDB) implementation; swappable
 - `src/features/` one folder per screen
 - `src/ui/` theme, hooks, chart helpers

@@ -114,6 +114,8 @@ export interface Log extends Base {
   note?: string
   photoId?: ID
   metric?: { label: string; value: number }
+  /** A moment worth remembering, such as finishing a first song. */
+  milestone?: boolean
 }
 
 export interface Pause extends Base {

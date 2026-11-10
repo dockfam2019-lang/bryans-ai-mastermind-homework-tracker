@@ -1,15 +1,14 @@
 import { repo } from '../../data'
 import { summarizeOnTime, recentByType } from '../../domain/attendance'
-import { addDays, DAY_SHORT, dueAt, formatCountdown, formatTime, fromLocalDate, MONTH_SHORT, relativeDay, startOfWeek, toLocalDate } from '../../domain/dates'
+import { DAY_SHORT, dueAt, formatCountdown, formatTime, fromLocalDate, MONTH_SHORT, relativeDay, toLocalDate } from '../../domain/dates'
 import { examCards } from '../../domain/exams'
 import { loadByDay, peakDay } from '../../domain/load'
 import { classesOn } from '../../domain/schedule'
 import type { Assignment, Course } from '../../domain/types'
 import { dueOn, nextUp, openAssignments, overdue } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
+import { HabitsTile } from '../life/HabitsTile'
 import { PulseChart } from './PulseChart'
-
-const HEAT_WEEKS = 10
 
 function markDone(a: Assignment) {
   return repo.assignments.put({ ...a, status: 'done', progress: 1, completedAt: Date.now() })
@@ -24,8 +23,9 @@ export function TodayPage() {
   const hobbies = useLive(() => repo.hobbies.all())
   const logs = useLive(() => repo.logs.all())
   const settings = useLive(() => repo.settings.get('main'))
+  const pauses = useLive(() => repo.pauses.all())
 
-  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings) return null
+  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses) return null
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
@@ -37,19 +37,11 @@ export function TodayPage() {
   const plannedHours = Math.round(load.reduce((sum, d) => sum + d.minutes, 0) / 6) / 10
   const devotional = recentByType(attendance, 'devotional', 10)
   const onTime = summarizeOnTime(devotional)
-  const hobby = hobbies.find((h) => !h.archived)
+  const habits = hobbies.filter((h) => !h.archived)
   const d = fromLocalDate(today)
   const dueCount = dueToday.length + late.length
   const classes = classesOn(courses, today, settings.rotationStart)
   const exams = examCards(assignments, today)
-
-  // hobby heat: last HEAT_WEEKS weeks, ending today, column per week
-  const minutesByDate = new Map<string, number>()
-  for (const l of logs) if (hobby && l.hobbyId === hobby.id) minutesByDate.set(l.localDate, (minutesByDate.get(l.localDate) ?? 0) + (l.durationMin ?? 20))
-  const heatStart = addDays(startOfWeek(today, 0), -(HEAT_WEEKS - 1) * 7) // columns are calendar weeks
-  const cells = Array.from({ length: HEAT_WEEKS * 7 }, (_, i) => addDays(heatStart, i))
-  const level = (m: number) => (m === 0 ? 0 : m < 20 ? 1 : m < 30 ? 2 : m < 45 ? 3 : 4)
-  const sessions = cells.filter((c) => (minutesByDate.get(c) ?? 0) > 0).length
 
   const nextCourse = next ? courseOf(next) : undefined
   const nextAt = next ? dueAt(next.dueDate, next.dueTime) : undefined
@@ -153,15 +145,7 @@ export function TodayPage() {
           )}
         </section>
 
-        {hobby && (
-          <section className="tile span-12" aria-label={`${hobby.name} practice`}>
-            <h2>{`${hobby.name} · last ${HEAT_WEEKS} weeks`}</h2>
-            <div className="heat" style={{ gridTemplateColumns: `repeat(${HEAT_WEEKS}, 1fr)`, maxWidth: 520 }} role="img" aria-label={`${sessions} sessions in ${HEAT_WEEKS} weeks`}>
-              {cells.map((c) => <i key={c} className={`l${level(minutesByDate.get(c) ?? 0)}`} style={c > today ? { opacity: 0.35 } : undefined} title={c} />)}
-            </div>
-            <p className="sub">{sessions} sessions. Streaks and stats arrive in Phase 3.</p>
-          </section>
-        )}
+        {habits.length > 0 && <HabitsTile hobbies={habits} logs={logs} pauses={pauses} today={today} weekStart={settings.weekStart} />}
       </div>
     </>
   )

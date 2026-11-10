@@ -251,3 +251,17 @@ input::placeholder { color: var(--muted); }
 .mcell .num { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
 .mchip { font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 640px) { .mcell { min-height: 64px; } .mchip { display: none; } }
+
+/* ---------- life (Phase 3) ---------- */
+.hobbycard { gap: 14px; }
+.hobbyhead { display: flex; gap: 12px; align-items: center; } .hobbyhead h3 { font-size: 1.3rem; font-weight: 600; } .hobbyhead h3 a { text-decoration: none; }
+.hobbyhead .streak { margin-left: auto; text-align: right; } .streak .num { font-size: 2.6rem; }
+.progress { display: grid; gap: 6px; } .bar { height: 4px; background: var(--fill-strong); border-radius: 2px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--accent); }
+.note { border-top: 1px solid var(--line); padding-top: 10px; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent-2); text-decoration: underline; cursor: pointer; }
+.statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin: 0; }
+.statgrid dt { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.06em; }
+.statgrid dd { margin: 4px 0 0; font-family: var(--font-wide); font-weight: 700; font-size: 1.6rem; letter-spacing: -0.04em; text-transform: capitalize; }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; } .photos figure { margin: 0; }
+.photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; background: var(--fill); display: block; }
+.heat i.l1, .heat i.l2, .heat i.l3, .heat i.l4 { border-radius: 3px; }

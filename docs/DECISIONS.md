@@ -23,6 +23,9 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 17 | Reminders are on by default and appear inside the app; system notifications are an opt-in button | Safari and mobile browsers do not deliver background notifications reliably |
 | 18 | A/B rotating classes use one setting, "first A day", and count school days (Mon to Fri) from it | Simplest rule that works without a school calendar |
 | 19 | Grades are stored as `score` and `maxScore` on each assignment instead of a separate Grade table | Fewer records; a grade is always tied to one assignment |
+| 20 | Streak rule: one missed period is tolerated, two in a row end the streak; skipped, paused and frozen periods are ignored | Brief: "two-day rule". Weekly cadences apply the same rule to weeks |
+| 21 | Check-ins without a duration count as 20 minutes toward a minutes-per-week goal | Otherwise a one-tap check-in could never reach a minutes goal |
+| 22 | At most 2 streak freezes per 30 days; a week with 4 or more paused days is skipped | Keeps freezes meaningful without a punishing counter |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.
