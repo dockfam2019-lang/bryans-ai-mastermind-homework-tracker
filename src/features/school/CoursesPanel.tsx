@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { repo } from '../../data'
 import { DAY_SHORT, formatTime } from '../../domain/dates'
 import type { Course, Meeting, Schedule } from '../../domain/types'
+import { newFromShare, readClassShare, toClassShare } from '../../domain/share'
 import { Modal } from '../../ui/Modal'
+import { downloadBlob } from '../insights/recapImage'
 import { showToast } from '../../ui/toast'
 
 export const COURSE_COLORS = ['#6fb4ff', '#ffb23e', '#c79bff', '#5fe1c2', '#ff8fa8', '#f0e060', '#9ad06b', '#ff9c7a']
@@ -18,10 +20,35 @@ const emptyMeeting = (): Meeting => ({ days: [1, 3, 5], start: '09:00', end: '10
 
 export function CoursesPanel({ courses }: { courses: Course[] }) {
   const [editing, setEditing] = useState<Partial<Course> | null>(null)
+
+  async function share(c: Course) {
+    const file = toClassShare(c, await repo.assignments.all())
+    downloadBlob(new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }), `studyboard-class-${c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`)
+    showToast(`Class file saved with ${file.assignments.length} open ${file.assignments.length === 1 ? 'assignment' : 'assignments'}. Send it to a classmate to import.`)
+  }
+
+  async function importShare(file?: File) {
+    if (!file) return
+    try {
+      const s = readClassShare(JSON.parse(await file.text()))
+      const all = await repo.courses.all()
+      let course = all.find((c) => c.name.toLowerCase() === s.course.name.toLowerCase())
+      const madeCourse = !course
+      if (!course) course = await repo.courses.put({ name: s.course.name, color: s.course.color || COURSE_COLORS[all.length % COURSE_COLORS.length], teacher: s.course.teacher, schedule: s.course.schedule ?? { kind: 'weekly', meetings: [] } })
+      const fresh = newFromShare(s, await repo.assignments.all(), course.id)
+      const ids: string[] = []
+      for (const a of fresh) ids.push((await repo.assignments.put({ ...a, courseId: course.id, priority: a.type === 'exam' || a.type === 'quiz' ? 3 : 2, status: 'todo', subtasks: [], tags: ['shared'], attachmentIds: [] })).id)
+      const courseId = course.id
+      showToast(`Imported ${ids.length} ${ids.length === 1 ? 'assignment' : 'assignments'}${madeCourse ? ` and the course ${s.course.name}` : ''}.`, { actionLabel: 'Undo', onAction: () => void (async () => { for (const id of ids) await repo.assignments.remove(id); if (madeCourse) await repo.courses.remove(courseId) })() })
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Could not read that file.')
+    }
+  }
   return (
     <div>
       <div className="inline" style={{ marginBottom: 16 }}>
         <button className="btn" type="button" onClick={() => setEditing({})}>Add course</button>
+        <label className="btn ghost" style={{ display: 'inline-block' }}>Import class file<input type="file" accept=".json,application/json" className="sr-only" onChange={(e) => { void importShare(e.target.files?.[0]); e.target.value = '' }} /></label>
       </div>
       {courses.length === 0 ? (
         <div className="empty"><p>No courses yet.</p><p className="sub">Add your classes so assignments, your timetable and the week view line up.</p></div>
@@ -31,6 +58,7 @@ export function CoursesPanel({ courses }: { courses: Course[] }) {
             <li key={c.id}>
               <i className="dot big" style={{ background: c.color }} />
               <span className="title"><b>{c.name}</b><span className="sub">{c.teacher ? `${c.teacher} · ` : ''}{scheduleSummary(c)}</span></span>
+              <button className="btn ghost" type="button" onClick={() => share(c)}>Share</button>
               <button className="btn ghost" type="button" onClick={() => setEditing(c)}>Edit</button>
             </li>
           ))}

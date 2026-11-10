@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { repo } from '../../data'
+import { getApiKey, getProvider } from '../../ai'
+import type { SuggestedStep } from '../../ai/types'
 import { splitIntoSteps } from '../../domain/steps'
 import type { Assignment, AssignmentType, Course, Subtask } from '../../domain/types'
 import { useLive } from '../../ui/hooks'
@@ -35,6 +37,17 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
   const [error, setError] = useState('')
   const focused = useLive(() => (draft.id ? repo.focusSessions.byIndex('targetId', draft.id) : []), [draft.id])
   const focusedMin = (focused ?? []).reduce((sum, f) => sum + f.minutes, 0)
+  const settings = useLive(() => repo.settings.get('main'))
+  const aiReady = !!settings?.aiEnabled && !!getApiKey()
+  const [aiSteps, setAiSteps] = useState<SuggestedStep[] | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+
+  async function suggestSteps() {
+    setAiBusy(true); setError('')
+    try { setAiSteps(await (await getProvider(true)).breakIntoSteps({ title: title.trim() || 'this task', notes: notes.trim() || undefined, minutes: Number(estimate) || undefined })) }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not get steps.') }
+    setAiBusy(false)
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault()
@@ -124,7 +137,18 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (newSub.trim()) { setSubtasks([...subtasks, { id: crypto.randomUUID(), title: newSub.trim(), done: false }]); setNewSub('') } } }} />
           <button type="button" className="btn ghost" onClick={() => { if (newSub.trim()) { setSubtasks([...subtasks, { id: crypto.randomUUID(), title: newSub.trim(), done: false }]); setNewSub('') } }}>Add</button>
           <button type="button" className="btn ghost" onClick={() => setSubtasks([...subtasks, ...splitIntoSteps(title.trim() || 'this task', Number(estimate) || 45)])}>Split into steps</button>
+          {aiReady && <button type="button" className="btn ghost" disabled={aiBusy} onClick={suggestSteps}>{aiBusy ? 'Asking Claude…' : 'Suggest steps with AI'}</button>}
         </div>
+        {aiSteps && (
+          <div className="aipreview">
+            <p className="sub">Suggested by Claude. Nothing changes until you add them, and Cancel still discards everything.</p>
+            <ol>{aiSteps.map((s, i) => <li key={i}>{s.title}{s.minutes ? ` (${s.minutes} min)` : ''}</li>)}</ol>
+            <div className="actions">
+              <button type="button" className="btn" onClick={() => { setSubtasks([...subtasks, ...aiSteps.map((s) => ({ id: crypto.randomUUID(), title: s.minutes ? `${s.title} (${s.minutes} min)` : s.title, done: false }))]); setAiSteps(null) }}>Add these steps</button>
+              <button type="button" className="btn ghost" onClick={() => setAiSteps(null)}>Discard</button>
+            </div>
+          </div>
+        )}
       </div>
       {error && <p className="error full" role="alert">{error}</p>}
       <div className="actions full">

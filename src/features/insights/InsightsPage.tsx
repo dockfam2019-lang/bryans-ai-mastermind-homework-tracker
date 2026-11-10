@@ -5,6 +5,7 @@ import { addDays, DAY_SHORT, startOfWeek, toLocalDate } from '../../domain/dates
 import { rankByHardness } from '../../domain/difficulty'
 import { learnWindows } from '../../domain/energy'
 import { weeklyReview } from '../../domain/hobbies'
+import { withTone } from '../../domain/tone'
 import { loadByDay, peakDay } from '../../domain/load'
 import { semesterRecap } from '../../domain/recap'
 import { capacityFor, DEFAULT_STUDY_MINUTES } from '../../domain/scheduler'
@@ -61,7 +62,7 @@ function Overview({ d }: { d: InsightsData }) {
     <div className="bento">
       <section className="tile span-12" aria-label="Weekly review">
         <h2>Weekly review</h2>
-        <p>This week you finished {doneThisWeek} {doneThisWeek === 1 ? 'assignment' : 'assignments'} and focused for {hm(focusThisWeek)}.</p>
+        <p>{withTone('review', d.settings.aiTone, `This week you finished ${doneThisWeek} ${doneThisWeek === 1 ? 'assignment' : 'assignments'} and focused for ${hm(focusThisWeek)}.`)}</p>
         {d.hobbies.map((h) => <p key={h.id} className="sub">{weeklyReview(h.name, d.logs, h.id, d.today)}</p>)}
       </section>
 

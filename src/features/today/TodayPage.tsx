@@ -31,8 +31,9 @@ export function TodayPage() {
   const blocks = useLive(() => repo.studyBlocks.all())
   const focusAll = useLive(() => repo.focusSessions.all())
   const readingAll = useLive(() => repo.readingItems.all())
+  const cardsAll = useLive(() => repo.cards.all())
 
-  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses || !blocks || !focusAll || !readingAll) return null
+  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses || !blocks || !focusAll || !readingAll || !cardsAll) return null
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
@@ -57,6 +58,7 @@ export function TodayPage() {
   const xp = game ? computeXp(game) : 0
   const lv = levelFor(xp)
   const quests = game ? weeklyQuests(game) : []
+  const cardsDue = cardsAll.filter((c) => c.due <= today).length
   const todaysBlocks = blocks.filter((b) => b.date === today && b.state !== 'dismissed')
 
   const nextCourse = next ? courseOf(next) : undefined
@@ -160,6 +162,14 @@ export function TodayPage() {
                 </div>
               </div>
             ))}
+          </section>
+        )}
+
+        {cardsDue > 0 && (
+          <section className="tile span-6" aria-label="Flashcards due">
+            <h2>Flashcards due</h2>
+            <div className="wide stat">{cardsDue}</div>
+            <p className="sub"><a href="#/school/cards">Review them</a>. A few minutes now saves an hour before the exam.</p>
           </section>
         )}
 

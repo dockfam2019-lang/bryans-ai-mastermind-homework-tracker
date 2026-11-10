@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, seedSample } from '../../data/seed'
 import { toLocalDate } from '../../domain/dates'
 import type { ThemeSetting } from '../../domain/types'
 import { useLive } from '../../ui/hooks'
+import { AiSettings } from './AiSettings'
 import { DataTools } from './DataTools'
 
 export function SettingsPage() {
@@ -86,6 +87,7 @@ export function SettingsPage() {
           <label htmlFor="rotation" className="mono">First A day (for A/B rotating classes)</label>
           <input id="rotation" type="date" value={settings.rotationStart ?? ''} onChange={(e) => setRotation(e.target.value)} />
         </div>
+        <AiSettings settings={settings} />
         <DataTools />
         <div className="field">
           <span className="mono">Data</span>

@@ -1,4 +1,5 @@
 import { computeBadges, computeXp, levelFor, weeklyQuests, type GameInput } from '../../domain/game'
+import { Friends } from './Friends'
 
 /** Opt-in game layer. Everything here is derived from your records, so nothing is ever taken away. */
 export function GameTab({ game }: { game: GameInput }) {
@@ -40,6 +41,8 @@ export function GameTab({ game }: { game: GameInput }) {
           ))}
         </div>
       </section>
+
+      <Friends level={lv.level} xp={xp} badges={badges.filter((b) => b.earned).length} />
     </div>
   )
 }

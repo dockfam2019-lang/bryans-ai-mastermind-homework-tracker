@@ -6,6 +6,8 @@ import { useLive, useNow } from '../../ui/hooks'
 import { AssignmentForm, type AssignmentDraft } from './AssignmentForm'
 import { AssignmentList } from './AssignmentList'
 import { AttendancePanel } from './AttendancePanel'
+import { CardsPanel } from './CardsPanel'
+import { SyllabusImport } from './SyllabusImport'
 import { GradesPanel } from './GradesPanel'
 import { ReadingPanel } from './ReadingPanel'
 import { CoursesPanel } from './CoursesPanel'
@@ -19,6 +21,7 @@ const TABS = [
   { id: 'grades', label: 'Grades' },
   { id: 'attendance', label: 'Attendance' },
   { id: 'reading', label: 'Reading' },
+  { id: 'cards', label: 'Cards' },
   { id: 'inbox', label: 'Inbox' },
 ]
 
@@ -33,9 +36,12 @@ export function SchoolPage({ tab }: { tab: string }) {
   const notes = useLive(() => repo.classNotes.all())
   const reading = useLive(() => repo.readingItems.all())
   const settings = useLive(() => repo.settings.get('main'))
+  const decks = useLive(() => repo.decks.all())
+  const cards = useLive(() => repo.cards.all())
   const [draft, setDraft] = useState<AssignmentDraft | null>(null)
   const [fromInbox, setFromInbox] = useState<InboxItem | null>(null)
   const [wizard, setWizard] = useState(false)
+  const [syllabus, setSyllabus] = useState(false)
 
   // "n" anywhere opens a new assignment
   useEffect(() => {
@@ -44,7 +50,7 @@ export function SchoolPage({ tab }: { tab: string }) {
     return () => window.removeEventListener('studyboard:new-assignment', open)
   }, [])
 
-  if (!assignments || !courses || !inbox || !scales || !attendance || !notes || !reading || !settings) return null
+  if (!assignments || !courses || !inbox || !scales || !attendance || !notes || !reading || !settings || !decks || !cards) return null
   const pendingInbox = inbox.filter((i) => !i.sorted).length
 
   function closeForm() {
@@ -71,6 +77,7 @@ export function SchoolPage({ tab }: { tab: string }) {
           </a>
         ))}
         <span className="grow" />
+        <button className="btn ghost" type="button" onClick={() => setSyllabus(true)}>Import syllabus</button>
         <button className="btn ghost" type="button" onClick={() => setWizard(true)}>Set up semester</button>
         <button className="btn" type="button" onClick={() => setDraft({ title: '' })}>New assignment</button>
       </nav>
@@ -92,9 +99,11 @@ export function SchoolPage({ tab }: { tab: string }) {
       {tab === 'grades' && <GradesPanel courses={courses} assignments={assignments} scales={scales} />}
       {tab === 'attendance' && <AttendancePanel courses={courses} records={attendance} notes={notes} today={today} rotationStart={settings.rotationStart} />}
       {tab === 'reading' && <ReadingPanel items={reading} courses={courses} today={today} />}
+      {tab === 'cards' && <CardsPanel decks={decks} cards={cards} courses={courses} assignments={assignments} today={today} />}
       {tab === 'inbox' && <InboxPanel items={inbox} courses={courses} today={today} onSort={(d, item) => { setFromInbox(item); setDraft(d) }} />}
 
       <AssignmentForm draft={draft} courses={courses} today={today} onClose={closeForm} onSaved={onSaved} />
+      <SyllabusImport open={syllabus} onClose={() => setSyllabus(false)} courses={courses} today={today} aiEnabled={settings.aiEnabled} />
       <SetupWizard open={wizard} onClose={() => setWizard(false)} today={today} />
     </>
   )

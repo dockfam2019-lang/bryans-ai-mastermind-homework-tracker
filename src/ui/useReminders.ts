@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { repo } from '../data'
 import { classAlerts, dueReminders, type Reminder } from '../domain/reminders'
+import { withTone } from '../domain/tone'
 import { showToast } from './toast'
 
 const KEY = 'studyboard-fired-reminders'
@@ -34,7 +35,11 @@ export function useReminders() {
       const [assignments, courses] = await Promise.all([repo.assignments.all(), repo.courses.all()])
       const due = [...dueReminders(assignments, now, fired), ...classAlerts(courses, now, fired, settings.rotationStart)]
       if (due.length === 0) return
-      for (const r of due) { fired.add(r.key); deliver(r) }
+      for (const r of due) {
+        fired.add(r.key)
+        const kind = r.key.startsWith('lead:') ? 'due' : r.key.startsWith('digest:') ? 'digest' : null
+        deliver(kind ? { ...r, body: withTone(kind, settings.aiTone, r.body) } : r)
+      }
       saveFired(fired)
     }
     void tick()

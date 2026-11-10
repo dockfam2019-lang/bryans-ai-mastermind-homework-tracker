@@ -35,6 +35,12 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 29 | Energy windows place hard work (difficulty 4 or more) in best hours and light work in low hours, around classes | Keeps the best hours free for hard work |
 | 30 | Wellbeing signals are labelled self-tracking, never medical advice, and use soft wording | Avoids implying diagnosis |
 | 31 | Backups are JSON without photos; restoring replaces everything and offers Undo | Photos can be large; Undo protects against mistakes |
+| 32 | AI uses the official Anthropic TypeScript SDK in the browser (`dangerouslyAllowBrowser`) with the user's own key, model `claude-opus-5-5`, structured JSON output and the server-side refusal fallback | Local-first app with no server; the user owns the key |
+| 33 | The API key is kept in localStorage, not IndexedDB, so it is never part of JSON backups | Backups get shared and stored; keys should not travel with them |
+| 34 | An offline extractor (lines with dates) works without AI; PDFs need AI, .docx and .pptx are read locally with fflate | Private by default; fflate is about 8 kB and only unzips |
+| 35 | The Claude SDK is loaded on first AI use, not in the main bundle | Most users never turn AI on |
+| 36 | Flashcards use a small SM-2 variant; reviews for exam decks are capped at the day before the exam | Cards always come back before the exam |
+| 37 | Sharing works through files and codes (class share JSON, SB1 friend codes); sync has tested last-write-wins merge rules but no server | Matches "no server in v1" |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.
