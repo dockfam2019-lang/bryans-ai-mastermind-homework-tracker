@@ -30,6 +30,11 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 24 | Exam prep plans run backward from the exam for at most 7 days: heavy start, practice in the middle, light review the day before | Matches the exam countdown research feature |
 | 25 | The focus timer ends on a wall-clock time and survives reloads; focus minutes are added to the assignment's actual minutes | Accurate in background tabs; feeds the Phase 5 planner |
 | 26 | Devotional, school and class on-time tracking share the Attendance record; on-time streaks use the same one-miss-forgiven rule | One model, consistent with hobby streaks |
+| 27 | XP, levels, badges and quests are derived from records, not stored; there are no negative terms | Nothing can be lost to a missed day; always consistent with the data |
+| 28 | The "AI planner" is a transparent heuristic (type, length, title hints, your past ratings and estimate vs actual time), with reasons shown and your own rating always winning | Works offline with no key; real AI stays optional in Phase 6 |
+| 29 | Energy windows place hard work (difficulty 4 or more) in best hours and light work in low hours, around classes | Keeps the best hours free for hard work |
+| 30 | Wellbeing signals are labelled self-tracking, never medical advice, and use soft wording | Avoids implying diagnosis |
+| 31 | Backups are JSON without photos; restoring replaces everything and offers Undo | Photos can be large; Undo protects against mistakes |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.

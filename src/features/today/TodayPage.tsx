@@ -8,6 +8,8 @@ import type { Assignment, Course } from '../../domain/types'
 import { dueOn, nextUp, openAssignments, overdue } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
 import { startFocus } from '../focus/focusStore'
+import { computeXp, levelFor, weeklyQuests } from '../../domain/game'
+import { computeStreak } from '../../domain/streaks'
 import { HabitsTile } from '../life/HabitsTile'
 import { createPrepBlocks, markBlockDone } from '../plan/planActions'
 import { PulseChart } from './PulseChart'
@@ -27,8 +29,10 @@ export function TodayPage() {
   const settings = useLive(() => repo.settings.get('main'))
   const pauses = useLive(() => repo.pauses.all())
   const blocks = useLive(() => repo.studyBlocks.all())
+  const focusAll = useLive(() => repo.focusSessions.all())
+  const readingAll = useLive(() => repo.readingItems.all())
 
-  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses || !blocks) return null
+  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses || !blocks || !focusAll || !readingAll) return null
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
@@ -45,6 +49,14 @@ export function TodayPage() {
   const dueCount = dueToday.length + late.length
   const classes = classesOn(courses, today, settings.rotationStart)
   const exams = examCards(assignments, today)
+  const gameOn = settings.gameEnabled
+  const game = gameOn ? {
+    assignments, focusSessions: focusAll, logs, attendance, readingItems: readingAll, today, weekStart: settings.weekStart,
+    bestStreak: Math.max(0, ...habits.map((h) => computeStreak({ hobby: h, logs, pauses, today, weekStart: settings.weekStart }).best)),
+  } : null
+  const xp = game ? computeXp(game) : 0
+  const lv = levelFor(xp)
+  const quests = game ? weeklyQuests(game) : []
   const todaysBlocks = blocks.filter((b) => b.date === today && b.state !== 'dismissed')
 
   const nextCourse = next ? courseOf(next) : undefined
@@ -148,6 +160,15 @@ export function TodayPage() {
                 </div>
               </div>
             ))}
+          </section>
+        )}
+
+        {game && (
+          <section className="tile span-6" aria-label="Level and quests">
+            <h2>Level {lv.level}</h2>
+            <div className="bar" role="progressbar" aria-valuenow={Math.round(lv.progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Progress to next level"><i style={{ width: `${lv.progress * 100}%` }} /></div>
+            <p className="sub">{xp} XP · {lv.next - xp} to level {lv.level + 1}</p>
+            <p className="sub">{quests.filter((q) => q.done).length} of {quests.length} weekly quests done. <a href="#/insights/game">See all</a></p>
           </section>
         )}
 

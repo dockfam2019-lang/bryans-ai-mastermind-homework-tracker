@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, seedSample } from '../../data/seed'
 import { toLocalDate } from '../../domain/dates'
 import type { ThemeSetting } from '../../domain/types'
 import { useLive } from '../../ui/hooks'
+import { DataTools } from './DataTools'
 
 export function SettingsPage() {
   const settings = useLive(() => repo.settings.get('main'))
@@ -16,6 +17,7 @@ export function SettingsPage() {
   const setTheme = (theme: ThemeSetting) => repo.settings.put({ ...settings, theme })
   const setWeekStart = (weekStart: 0 | 1) => repo.settings.put({ ...settings, weekStart })
   const setReminders = (notifications: boolean) => repo.settings.put({ ...settings, notifications })
+  const setGame = (gameEnabled: boolean) => repo.settings.put({ ...settings, gameEnabled })
   const setRotation = (rotationStart: string) => repo.settings.put({ ...settings, rotationStart: rotationStart || undefined })
   const permission = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
   async function askPermission() {
@@ -73,9 +75,18 @@ export function SettingsPage() {
           {permission === 'denied' && <p className="sub">System notifications are blocked in your browser settings. In-app reminders still work.</p>}
         </div>
         <div className="field">
+          <span className="mono" id="game-label">Game layer (XP, levels, badges, quests)</span>
+          <div className="seg" role="group" aria-labelledby="game-label">
+            <button type="button" aria-pressed={settings.gameEnabled} onClick={() => setGame(true)}>On</button>
+            <button type="button" aria-pressed={!settings.gameEnabled} onClick={() => setGame(false)}>Off</button>
+          </div>
+          <p className="sub">Optional and never punishing: no XP is lost for a missed day, and nothing nags you.</p>
+        </div>
+        <div className="field">
           <label htmlFor="rotation" className="mono">First A day (for A/B rotating classes)</label>
           <input id="rotation" type="date" value={settings.rotationStart ?? ''} onChange={(e) => setRotation(e.target.value)} />
         </div>
+        <DataTools />
         <div className="field">
           <span className="mono">Data</span>
           <button className="btn ghost" type="button" disabled={busy} onClick={loadSample}>Reload sample data</button>
@@ -87,7 +98,6 @@ export function SettingsPage() {
           ) : (
             <button className="btn danger" type="button" onClick={() => setConfirming(true)}>Delete all data</button>
           )}
-          <p className="sub">Export and import arrive in Phase 5.</p>
         </div>
       </div>
     </>

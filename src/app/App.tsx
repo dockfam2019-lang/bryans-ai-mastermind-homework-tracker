@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { repo } from '../data'
 import { FocusDock } from '../features/focus/FocusDock'
+import { InsightsPage } from '../features/insights/InsightsPage'
 import { LifePage } from '../features/life/LifePage'
-import { ComingSoon } from '../features/placeholder/ComingSoon'
 import { SchoolPage } from '../features/school/SchoolPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { TodayPage } from '../features/today/TodayPage'
@@ -57,7 +57,7 @@ function Page({ route }: { route: string }) {
     case 'week': return <WeekPage tab={tab} />
     case 'school': return <SchoolPage tab={tab} />
     case 'life': return <LifePage sub={tab} />
-    case 'insights': return <ComingSoon id="insights" />
+    case 'insights': return <InsightsPage tab={tab} />
     default: return <TodayPage />
   }
 }

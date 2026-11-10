@@ -3,6 +3,10 @@ import { repo } from '../../data'
 import { addDays, DAY_SHORT, fromLocalDate, MONTH_SHORT, relativeDay, toLocalDate } from '../../domain/dates'
 import { capacityFor, DEFAULT_STUDY_MINUTES, plannedMinutes, suggestPlan, type PlanResult } from '../../domain/scheduler'
 import type { Assignment, Course, StudyBlock } from '../../domain/types'
+import { assignStartTimes, minutesOf } from '../../domain/energy'
+import { predictDifficulty } from '../../domain/difficulty'
+import { classesOn } from '../../domain/schedule'
+import { showToast } from '../../ui/toast'
 import { useLive, useNow } from '../../ui/hooks'
 import { startFocus } from '../focus/focusStore'
 import { acceptBlock, dismissBlock, generatePlan, markBlockDone, moveBlock, removeBlock } from './planActions'
@@ -16,11 +20,13 @@ export function PlanPanel() {
   const courses = useLive(() => repo.courses.all())
   const blocks = useLive(() => repo.studyBlocks.all())
   const settings = useLive(() => repo.settings.get('main'))
+  const windows = useLive(() => repo.energyWindows.all())
+  const classes = useLive(() => repo.courses.all())
   const [moving, setMoving] = useState<string | null>(null)
   const [result, setResult] = useState<PlanResult | null>(null)
   const [busy, setBusy] = useState(false)
 
-  if (!assignments || !courses || !blocks || !settings) return null
+  if (!assignments || !courses || !blocks || !settings || !windows || !classes) return null
   const perDay = settings.studyMinutesPerDay ?? DEFAULT_STUDY_MINUTES
   const byId = new Map<string, Assignment>(assignments.map((a) => [a.id, a]))
   const courseOf = (a?: Assignment): Course | undefined => courses.find((c) => c.id === a?.courseId)
@@ -34,6 +40,20 @@ export function PlanPanel() {
   const shown = blocks.filter((b) => b.state !== 'dismissed')
   const hasSuggestions = shown.some((b) => b.state === 'suggested')
 
+  async function placeInBestTimes() {
+    if (windows!.length === 0) { showToast('Set your energy windows first (Insights, When you focus best).'); return }
+    const history = assignments!.filter((a) => a.status === 'done')
+    const open = blocks!.filter((b) => b.state !== 'dismissed' && b.state !== 'done' && !b.start)
+    const placed = assignStartTimes({
+      blocks: open, assignments: assignments!, windows: windows!,
+      busy: (date) => classesOn(classes!, date, settings!.rotationStart).map(({ meeting }) => ({ start: minutesOf(meeting.start), end: minutesOf(meeting.end) })),
+      difficultyOf: (a) => predictDifficulty(a, history).score,
+    })
+    const changed = placed.filter((b, i) => b.start && b.start !== open[i].start)
+    for (const b of changed) await repo.studyBlocks.put(b)
+    showToast(changed.length ? `Placed ${changed.length} ${changed.length === 1 ? 'block' : 'blocks'}: hard work in your best hours.` : 'No block fit in your windows. Try wider windows or fewer blocks that day.')
+  }
+
   async function suggest() {
     setBusy(true)
     setResult(await generatePlan(assignments!, today, perDay))
@@ -44,6 +64,7 @@ export function PlanPanel() {
     <div>
       <div className="inline" style={{ marginBottom: 16 }}>
         <button className="btn" type="button" disabled={busy} onClick={suggest}>Suggest my plan</button>
+        <button className="btn ghost" type="button" onClick={placeInBestTimes}>Place blocks in my best times</button>
         <label>Time set aside per day (minutes)
           <input type="number" min="30" step="15" value={perDay} onChange={(e) => void repo.settings.put({ ...settings, studyMinutesPerDay: Math.max(30, Number(e.target.value) || DEFAULT_STUDY_MINUTES) })} />
         </label>
@@ -63,6 +84,7 @@ export function PlanPanel() {
         <div className="empty"><p>No study blocks yet.</p><p className="sub">Press “Suggest my plan”. The planner fits each assignment’s estimated time before its due date, earliest due first. You can accept, move or dismiss every block.</p></div>
       )}
 
+      {shown.some((b) => plannedMinutes(blocks, b.date) > 90) && <p className="sub" style={{ marginBottom: 12 }}>Tip: on days with more than 90 minutes planned, take a 10 minute break about every 50 minutes.</p>}
       {days.map((d) => {
         const dayBlocks = shown.filter((b) => b.date === d).sort((a, b) => (a.state === 'suggested' ? 1 : 0) - (b.state === 'suggested' ? 1 : 0))
         if (dayBlocks.length === 0) return null
@@ -81,7 +103,7 @@ export function PlanPanel() {
               return (
                 <div key={b.id} className={`planblock ${b.state}`}>
                   <i className="dot big" style={{ background: courseOf(a)?.color ?? 'var(--muted)' }} />
-                  <span className="title"><b>{b.label ?? a?.title ?? 'Study'}</b><span className="sub">{b.label ? `${a?.title ?? ''} · ` : ''}{b.minutes} min{b.state === 'suggested' ? ' · suggested' : ''}{b.examPrep ? ' · exam prep' : ''}</span></span>
+                  <span className="title"><b>{b.label ?? a?.title ?? 'Study'}</b><span className="sub">{b.label ? `${a?.title ?? ''} · ` : ''}{b.start ? `${b.start} · ` : ''}{b.minutes} min{b.state === 'suggested' ? ' · suggested' : ''}{b.examPrep ? ' · exam prep' : ''}</span></span>
                   {b.state === 'suggested' && <button className="btn" type="button" onClick={() => acceptBlock(b)}>Accept</button>}
                   {b.state === 'accepted' && a && <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: a.id, title: a.title })}>Start</button>}
                   {b.state === 'accepted' && <button className="btn ghost" type="button" onClick={() => markBlockDone(b)}>Done</button>}
