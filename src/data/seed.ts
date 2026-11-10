@@ -45,6 +45,15 @@ export async function seedSample(repo: Repository, today: LocalDate): Promise<vo
   for (const [courseId, title, score, maxScore, offset] of graded) {
     await repo.assignments.put({ ...base, courseId, title, type: 'homework', dueDate: addDays(today, offset), priority: 2, status: 'done', score, maxScore, progress: 1, completedAt: Date.now() + offset * 86400000 })
   }
+  // a week of focus sessions, mostly late afternoon, so Insights has something to show
+  const open = (await repo.assignments.all()).filter((a) => a.status !== 'done')
+  for (let i = 1; i <= 8; i++) {
+    const day = addDays(today, -Math.ceil(i / 1.5))
+    const target = open[i % open.length]
+    const [y, m, d] = day.split('-').map(Number)
+    const startedAt = new Date(y, m - 1, d, i % 3 === 0 ? 10 : 16 + (i % 2), 0).getTime()
+    await repo.focusSessions.put({ targetType: 'assignment', targetId: target.id, localDate: day, startedAt, minutes: 25 })
+  }
   await repo.readingItems.put({ title: 'Great Expectations, chapters 8 to 14', totalPages: 120, pagesRead: 35, deadline: addDays(today, 8), courseId: lit.id })
 
   // ten school days of devotional attendance, one late

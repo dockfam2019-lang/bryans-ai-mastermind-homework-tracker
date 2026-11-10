@@ -29,7 +29,7 @@ export function HobbyCard({ hobby, data, onDetails }: { hobby: Hobby; data: Hobb
         </div>
       </header>
 
-      <div className="progress" aria-label={`${progress.value} of ${progress.target} ${progress.unit} this week`}>
+      <div className="progress">
         <div className="bar"><i style={{ width: `${pct}%` }} /></div>
         <span className="sub">{progress.value} of {progress.target} {progress.unit} this week</span>
       </div>

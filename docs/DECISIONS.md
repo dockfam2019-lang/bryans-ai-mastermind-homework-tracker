@@ -41,6 +41,9 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 35 | The Claude SDK is loaded on first AI use, not in the main bundle | Most users never turn AI on |
 | 36 | Flashcards use a small SM-2 variant; reviews for exam decks are capped at the day before the exam | Cards always come back before the exam |
 | 37 | Sharing works through files and codes (class share JSON, SB1 friend codes); sync has tested last-write-wins merge rules but no server | Matches "no server in v1" |
+| 38 | End-to-end tests (Playwright) run on the production build with a fixed clock (Tue 2026-11-10, noon), desktop and phone sizes, and fail on any console error | Predictable dates; catches runtime errors unit tests cannot |
+| 39 | Accessibility is checked with axe on all 13 screens in both themes; any serious or critical WCAG 2.1 AA issue fails the build | Contrast, labels and roles stay correct as the UI changes |
+| 40 | Weekly review sentences compare the last 7 days with the 7 before; hobby cards show the calendar week | Labels say which, so the two numbers never look contradictory |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.

@@ -1,48 +1,73 @@
 # Studyboard
 
-A local-first homework planner and hobby tracker. It installs as a web app (PWA), works offline, needs no account, and keeps your data on your device.
+A homework planner and hobby tracker in one app. It installs on your phone or laptop as a web app, works offline, needs no account, and keeps your data on your device.
 
-Repo name: bryans-ai-mastermind-homework-tracker. Plan, spec and research are in [`ROADMAP.md`](ROADMAP.md) and [`docs/`](docs/).
+Built for Bryan's AI Mastermind. The plan, spec, research and design history are in [`ROADMAP.md`](ROADMAP.md) and [`docs/`](docs/).
+
+![Today screen](docs/screenshots/today-desktop.png)
 
 ## Run it
 
+You need [Node.js](https://nodejs.org) 20 or newer.
+
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm test           # unit tests (Vitest)
-npm run typecheck
-npm run lint
-npm run build      # production build with service worker
-npm run preview    # serve the build at http://localhost:4173
+npm run dev          # open http://localhost:5173
 ```
 
-Requires Node 20 or newer.
+The first launch loads sample data (three courses, a week of assignments, a guitar habit) so every screen has something to show. Settings has "Delete all data" to start fresh and "Reload sample data" to bring it back.
 
-## Status
-
-| Phase | State |
+| Command | What it does |
 | --- | --- |
-| 1. Foundations and design system | Done: app shell, PWA, storage layer, data model, sample data, Cinematic Glass theme, Today screen |
-| 2. Assignments | Done: courses and assignments, quick add, Week and Month views, inbox, setup wizard, reminders, exam countdown |
-| 3. Hobbies | Done: cadences, one-tap check-ins, forgiving streaks, freezes and vacation pause, heatmaps, stats, journal with milestones and photos |
-| 4. Planning | Done: study-block planner, exam prep plan, focus timer, grades with custom scales, reading tracker, attendance and class notes, on-time tracking |
-| 5. Insights and game | Done: opt-in game layer, balance view, weekly review, workload heatmap, energy-aware planner, mood check-in, JSON/ICS/CSV import and export, recap image |
-| 6. AI, flashcards and stubs | Done: syllabus import (offline or with Claude), AI step suggestions, tone setting, flashcards with spaced repetition tied to exams, class share files, friend codes, sync merge rules, importer registry |
-| 7. Polish | Next |
+| `npm run dev` | Development server with hot reload |
+| `npm test` | Unit tests (Vitest) for all the date, streak, scheduling and parsing logic |
+| `npm run e2e` | End-to-end and accessibility tests in Chromium, desktop and phone sizes (Playwright). First run: `npx playwright install chromium` |
+| `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
+| `npm run build` then `npm run preview` | Production build with the offline service worker, served at http://localhost:4173 |
+| `npm run screenshots` | Refreshes the images in `docs/screenshots/` |
 
-Today shows live tiles from sample data: next up, due count, classes today, exam countdown, devotional on-time dots, a 14 day workload chart, a due-soon checklist and a hobby heatmap. School has assignments (grouped, searchable, with subtasks), courses with weekly, block or A/B rotating schedules, a quick-capture inbox, a quick-add line ("math ch5 problems due fri 9am ~45m") and a semester setup wizard. Week and Month calendars show classes, due dates and workload. Reminders run while the app is open. Keyboard: `n` new assignment, `t` today, `/` search. Life has hobby cards with streaks that survive one missed day, a year heatmap, per-hobby stats, a journal with milestones and progress photos, and a vacation pause. Week has a Plan tab that suggests study blocks you can accept, move or dismiss, with overload warnings. A floating focus timer (25/5/15 Pomodoro, or "Start for 5 minutes") logs time per assignment. School also has Grades (course averages, custom scales, a "what do I need" calculator), Attendance (devotional, school and class on-time tracking, classes you can still miss, class notes) and Reading (pages a day to finish on time). Insights has a weekly review, a 30 day workload chart and a 6 week heatmap, a school vs hobby balance chart with a gentle nudge, a mood check-in with a burnout signal (self-tracking, not medical advice), the hours you focus best, a predicted-hardest list with reasons, and a semester recap image. Energy windows let the planner put hard work in your best hours. The game layer (Settings, off by default) adds XP, levels, badges and weekly quests that never take anything away. Settings also exports and restores a JSON backup, and exports or imports calendar (.ics) and CSV files.
+To install it as an app, open the production build in Chrome, Edge or Safari and choose "Install" or "Add to Home Screen".
 
-School can import a syllabus: paste text or pick a .docx, .pptx or .txt file and it finds dated items on your device; with optional AI on (your own Anthropic key, stored only in your browser) it also reads PDFs and messy syllabi using Claude. Everything found is a preview you edit before adding. Assignments can get AI-suggested steps. Flashcards use spaced repetition and always come back before a linked exam. Courses can be shared with classmates as a file, and the game tab has a private friends leaderboard using codes you swap by message.
+## What it does
 
-### AI and privacy
+**Today** shows only what matters now: what is next and how long until it is due, classes today, study blocks, an exam countdown, devotional on-time dots, the workload for the next 14 days, what is due soon, and one-tap hobby check-ins. "Start for 5 minutes" opens a focus timer on the next assignment.
 
-AI is off by default. When on, only what you choose to send goes to Anthropic: the syllabus or the single assignment, today's date and your course names. The key never leaves your browser except in those requests and is never included in backups.
+**School**
+- Add assignments with one sentence: `math ch5 problems due fri 9am ~45m` fills in the course, date, time and estimate.
+- Courses with weekly, block or A/B rotating timetables. Share a course with classmates as a file.
+- Grades with custom scales and a "what do I need on the final" calculator.
+- Attendance for devotional, school and each class, with on-time rates and how many classes you can still miss.
+- Reading tracker (pages a day to finish on time), flashcards with spaced repetition that always come back before the exam, class notes, and a quick-capture inbox.
+- Import a syllabus: paste it or pick a .docx, .pptx or .txt file and review what was found before anything is saved.
+
+**Week** has week and month calendars and a Plan tab that suggests study blocks before each due date (accept, move or dismiss), warns about overloaded days, and can put hard work in your best hours.
+
+**Life** tracks hobbies with flexible goals (every day, certain weekdays, N times a week, or minutes a week). Streaks forgive one missed day, freezes and vacation mode never count against you, and a GitHub-style heatmap keeps every good day visible. Each hobby has stats, a journal, milestones and progress photos.
+
+**Insights** has a weekly review, workload chart and heatmap, a school vs hobby balance chart, a mood check-in with a gentle burnout signal (self-tracking, not medical advice), the hours you focus best, the assignments likely to be hardest and why, and a semester recap image. The optional game layer adds XP, levels, badges, weekly quests and a friends leaderboard, and never takes anything away for a missed day.
+
+**Settings** covers theme, week start, reminders (in the app, plus system notifications if you allow them), tone (gentle, balanced or strict), JSON backup and restore, and calendar (.ics) and CSV import and export.
+
+Keyboard: `n` new assignment, `t` today, `/` search.
+
+| | |
+| --- | --- |
+| ![School](docs/screenshots/school-desktop.png) | ![Plan](docs/screenshots/week-plan-desktop.png) |
+| ![Life](docs/screenshots/life-desktop.png) | ![Insights](docs/screenshots/insights-desktop.png) |
+
+## AI and privacy
+
+Everything works without AI and without the internet. AI is off by default. If you turn it on in Settings and paste your own Anthropic API key, the syllabus importer can also read PDFs and messy syllabi, and assignments can suggest steps. Only what you choose to send goes to Anthropic: that syllabus or that one assignment, today's date and your course names. Every AI result is a preview you can edit or throw away. The key is stored only in your browser and is never part of a backup.
 
 ## How it is built
 
-- `src/domain/` pure logic with tests: local dates, streaks, hobby stats, quick add parsing, schedules, reminders, workload, scheduling, exam prep, grades, pomodoro, reading, attendance, game, balance, difficulty, energy, wellbeing, ICS and CSV
-- `src/data/` repository interfaces plus a Dexie (IndexedDB) implementation; swappable
-- `src/features/` one folder per screen
-- `src/ui/` theme, hooks, chart helpers
-- Dates are stored as local `YYYY-MM-DD` strings so streaks never depend on UTC
-- No network calls except loading the app itself; fonts are bundled
+- React, TypeScript and Vite, installed as a PWA with an offline service worker.
+- Data lives in IndexedDB (through Dexie) behind a small repository interface, so the storage can be swapped later.
+- `src/domain/` holds the logic as pure, tested functions: local dates, streaks, quick-add parsing, schedules and A/B rotations, reminders, workload, the study planner, exam prep, grades, Pomodoro, reading pace, attendance, game rules, balance, difficulty prediction, energy windows, wellbeing, ICS and CSV, flashcards and sharing.
+- `src/features/` has one folder per screen; `src/ui/` holds the theme and shared pieces.
+- Dates are stored as local `YYYY-MM-DD` strings, so travel, daylight saving changes and midnight never break a streak.
+- No network calls except loading the app, and the optional AI requests you start yourself. Fonts are bundled.
+
+## Status
+
+All seven phases of the [roadmap](ROADMAP.md) are built: foundations and design system, assignments, hobbies, planning, insights and game, AI and flashcards, and polish. Not built yet, by design: syncing between devices (needs a server; the merge rules exist and are tested), live "study with friends" sessions, and direct Canvas, Google Classroom or Moodle import. See [`docs/DECISIONS.md`](docs/DECISIONS.md) for every choice made along the way.

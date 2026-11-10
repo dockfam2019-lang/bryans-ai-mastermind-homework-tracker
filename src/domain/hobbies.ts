@@ -58,17 +58,17 @@ export function hobbyStats(args: { hobby: Hobby; logs: Log[]; pauses: Pause[]; t
   return { sessions: mine.length, totalMinutes, weeklyAvgMinutes, bestWeek, consistency, timeOfDay }
 }
 
-/** One calm sentence comparing the last 7 days with the 7 before. Never scolds. */
+/** One calm sentence comparing the last 7 days with the 7 days before. Never scolds. */
 export function weeklyReview(name: string, logs: Log[], hobbyId: string, today: LocalDate): string {
   const count = (from: LocalDate, to: LocalDate) => logs.filter((l) => l.hobbyId === hobbyId && l.localDate >= from && l.localDate <= to).length
   const now = count(addDays(today, -6), today)
   const before = count(addDays(today, -13), addDays(today, -7))
   const times = (n: number) => `${n} ${n === 1 ? 'session' : 'sessions'}`
   if (now === 0 && before === 0) return `${name}: no sessions in the last two weeks. Whenever you are ready, one short one is enough.`
-  if (now === 0) return `${name}: no sessions this week. The week before you did ${times(before)}. One short session restarts the rhythm.`
-  if (now > before) return `${name}: ${times(now)} this week, ${now - before} more than the week before.`
-  if (now < before) return `${name}: ${times(now)} this week, ${before - now} fewer than the week before. A lighter week is fine.`
-  return `${name}: ${times(now)} this week, the same as the week before.`
+  if (now === 0) return `${name}: no sessions in the last 7 days. The 7 days before, you did ${times(before)}. One short session restarts the rhythm.`
+  if (now > before) return `${name}: ${times(now)} in the last 7 days, ${now - before} more than the 7 days before.`
+  if (now < before) return `${name}: ${times(now)} in the last 7 days, ${before - now} fewer than the 7 days before. A lighter week is fine.`
+  return `${name}: ${times(now)} in the last 7 days, the same as the 7 days before.`
 }
 
 export interface HeatCell {

@@ -61,16 +61,17 @@ export function WeekPage({ tab }: { tab: string }) {
       </nav>
 
       {plan ? <PlanPanel /> : month ? (
-        <div className="monthgrid" role="grid" aria-label="Month calendar">
-          <div className="monthhead" role="row">{weeks[0].map((d) => <span key={d} role="columnheader" className="mono">{DAY_SHORT[fromLocalDate(d).getDay()]}</span>)}</div>
+        <div className="monthgrid" aria-label="Month calendar" role="group">
+          {weeks[0].map((d) => <span key={d} className="mono monthhead" aria-hidden="true">{DAY_SHORT[fromLocalDate(d).getDay()]}</span>)}
           {weeks.flat().map((d) => {
             const items = dueOn(d)
-            const alpha = Math.min(0.8, loadOf(d) / maxLoad * 0.8)
+            const alpha = Math.min(0.45, (loadOf(d) / maxLoad) * 0.45)
+            const fd = fromLocalDate(d)
             return (
-              <button key={d} type="button" role="gridcell" className={`mcell${d === today ? ' today' : ''}${sameMonth(d, anchor) ? '' : ' faded'}${selected === d ? ' selected' : ''}`}
-                style={{ background: loadOf(d) > 0 ? `color-mix(in srgb, var(--accent) ${Math.round(alpha * 100)}%, transparent)` : undefined }}
-                onClick={() => setSelected(selected === d ? null : d)} aria-label={`${d}, ${items.length} due`}>
-                <span className="num">{fromLocalDate(d).getDate()}</span>
+              <button key={d} type="button" aria-pressed={selected === d} className={`mcell${d === today ? ' today' : ''}${sameMonth(d, anchor) ? '' : ' faded'}${selected === d ? ' selected' : ''}`}
+                style={{ background: loadOf(d) > 0 ? `color-mix(in srgb, var(--accent) ${Math.round(alpha * 100)}%, var(--bg))` : undefined }}
+                onClick={() => setSelected(selected === d ? null : d)}>
+                <span className="num">{fd.getDate()}<span className="sr-only"> {DAY_SHORT[fd.getDay()]} {MONTH_SHORT[fd.getMonth()]}, {items.length} due</span></span>
                 {items.slice(0, 2).map((a) => <span key={a.id} className="mchip"><i className="dot" style={{ background: courseOf(a)?.color }} />{a.title}</span>)}
                 {items.length > 2 && <span className="sub">+{items.length - 2} more</span>}
               </button>
@@ -85,7 +86,7 @@ export function WeekPage({ tab }: { tab: string }) {
             return (
               <section key={d} className={`daycol${d === today ? ' today' : ''}`} aria-label={d}>
                 <header><span className="mono">{DAY_SHORT[fromLocalDate(d).getDay()]}</span><b>{fromLocalDate(d).getDate()}</b></header>
-                <div className="loadbar" aria-label={`${loadOf(d)} minutes of work`}><i style={{ width: `${Math.min(100, (loadOf(d) / maxLoad) * 100)}%` }} /></div>
+                <div className="loadbar" role="img" aria-label={`${loadOf(d)} minutes of work`}><i style={{ width: `${Math.min(100, (loadOf(d) / maxLoad) * 100)}%` }} /></div>
                 {classes.map(({ course, meeting }) => (
                   <div key={course.id + meeting.start} className="slot class"><i className="dot" style={{ background: course.color }} /><span>{formatTime(meeting.start)}</span><b>{course.name}</b></div>
                 ))}

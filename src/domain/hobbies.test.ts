@@ -62,13 +62,13 @@ describe('weeklyReview', () => {
   it('says how this week compares to the one before, kindly', () => {
     // the last 7 days (Nov 5 to 11) hold 6 logs; the 7 days before (Oct 29 to Nov 4) hold none
     const logs = mk('2026-11-05', '2026-11-06', '2026-11-08', '2026-11-09', '2026-11-10', '2026-11-11')
-    expect(weeklyReview('Guitar', logs, 'h', '2026-11-11')).toBe('Guitar: 6 sessions this week, 6 more than the week before.')
+    expect(weeklyReview('Guitar', logs, 'h', '2026-11-11')).toBe('Guitar: 6 sessions in the last 7 days, 6 more than the 7 days before.')
   })
   it('handles fewer, equal, zero this week and nothing at all', () => {
     const base = mk('2026-10-30', '2026-10-31', '2026-11-01') // previous window: 3
-    expect(weeklyReview('Guitar', [...base, ...mk('2026-11-06')], 'h', '2026-11-11')).toBe('Guitar: 1 session this week, 2 fewer than the week before. A lighter week is fine.')
-    expect(weeklyReview('Guitar', [...base, ...mk('2026-11-06', '2026-11-07', '2026-11-08')], 'h', '2026-11-11')).toBe('Guitar: 3 sessions this week, the same as the week before.')
-    expect(weeklyReview('Guitar', base, 'h', '2026-11-11')).toContain('no sessions this week')
+    expect(weeklyReview('Guitar', [...base, ...mk('2026-11-06')], 'h', '2026-11-11')).toBe('Guitar: 1 session in the last 7 days, 2 fewer than the 7 days before. A lighter week is fine.')
+    expect(weeklyReview('Guitar', [...base, ...mk('2026-11-06', '2026-11-07', '2026-11-08')], 'h', '2026-11-11')).toBe('Guitar: 3 sessions in the last 7 days, the same as the 7 days before.')
+    expect(weeklyReview('Guitar', base, 'h', '2026-11-11')).toContain('no sessions in the last 7 days')
     expect(weeklyReview('Guitar', [], 'h', '2026-11-11')).toContain('no sessions in the last two weeks')
   })
 })

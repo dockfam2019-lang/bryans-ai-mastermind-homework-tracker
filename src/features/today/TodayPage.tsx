@@ -37,8 +37,9 @@ export function TodayPage() {
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
-  const dueToday = dueOn(assignments, today)
   const late = overdue(assignments, now)
+  // items due earlier today and already past their time count once, as "waiting"
+  const dueToday = dueOn(assignments, today).filter((a) => !late.includes(a))
   const open = openAssignments(assignments)
   const load = loadByDay(assignments, today, 14)
   const peak = peakDay(load)
@@ -109,7 +110,7 @@ export function TodayPage() {
         <section className="tile span-3" aria-label="Devotional on time">
           <h2>Devotional on time</h2>
           <div className="wide stat">{onTime.pct === null ? '–' : `${onTime.pct}%`}</div>
-          <div className="ondots" aria-label={`${onTime.onTime} of ${onTime.total} recent devotionals on time`}>
+          <div className="ondots" role="img" aria-label={`${onTime.onTime} of ${onTime.total} recent devotionals on time`}>
             {devotional.map((r) => <i key={r.id} className={r.status === 'on-time' ? '' : r.status} title={`${r.localDate}: ${r.status}`} />)}
           </div>
         </section>
@@ -184,7 +185,7 @@ export function TodayPage() {
 
         <section className="tile span-6" aria-label="Week load">
           <h2>Next 14 days</h2>
-          <div className="wide stat">{plannedHours}<small className="sub" style={{ fontSize: '0.3em', marginLeft: 8 }}>HOURS PLANNED</small></div>
+          <div className="statline"><span className="wide stat">{plannedHours}</span><span className="mono">hours planned</span></div>
           <PulseChart load={load} today={today} peak={peak} />
         </section>
 
