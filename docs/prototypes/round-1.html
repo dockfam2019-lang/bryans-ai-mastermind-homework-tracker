@@ -1,0 +1,421 @@
+<title>Studyboard UI Prototypes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout concept: a single scrolling column of ten full-width prototype frames, each a different take on the Today screen, with a rating row under each. */
+:root {
+  --bg: #f4f4f2; --fg: #181a1c; --muted: #5c6166; --line: #d9dbdc; --chip: #e7e8e8; --accent: #2b4fd8;
+  --ui: "Manrope", system-ui, sans-serif; --serif: "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace; --wide: "Unbounded", "Manrope", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 56px; }
+header h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1; margin: 0 0 12px; text-wrap: balance; }
+header p { margin: 0; max-width: 62ch; color: var(--muted); line-height: 1.55; font-size: 1rem; }
+figure { margin: 0; display: grid; gap: 14px; }
+figcaption { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: baseline; justify-content: space-between; }
+figcaption h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+figcaption h2 span { font-family: var(--mono); font-weight: 500; color: var(--muted); margin-right: 8px; }
+figcaption p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; max-width: 60ch; line-height: 1.45; }
+.rate { display: flex; gap: 6px; }
+.rate button { font: inherit; font-size: .85rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.rate button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.summary { border-top: 1px solid var(--line); padding-top: 24px; display: grid; gap: 12px; }
+.summary h2 { margin: 0; font-size: 1.05rem; }
+.summary textarea { width: 100%; min-height: 96px; font: .9rem/1.5 var(--mono); background: var(--chip); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; box-sizing: border-box; resize: vertical; }
+.summary button { justify-self: start; font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 999px; border: 0; background: var(--fg); color: var(--bg); cursor: pointer; }
+
+/* ---------- shared frame ---------- */
+.frame { position: relative; overflow: hidden; border-radius: 18px; min-height: 600px; container-type: inline-size; isolation: isolate; font-family: var(--ui); }
+.mono { font-family: var(--mono); letter-spacing: .04em; }
+.in { position: relative; z-index: 2; padding: 26px clamp(18px, 4cqw, 44px); display: flex; flex-direction: column; min-height: 600px; box-sizing: border-box; }
+
+/* ---------- 01 cinematic timeline ---------- */
+.p1 { background: radial-gradient(110% 80% at 72% 18%, #4a3d30 0%, #1c1916 52%, #0d0c0b 100%); color: #f2ede5; }
+.p1 .nav { align-self: center; display: inline-flex; gap: 4px; padding: 5px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: .85rem; }
+.p1 .nav span { padding: 7px 16px; border-radius: 999px; color: #d8d1c6; }
+.p1 .nav .on { background: #f2ede5; color: #1c1916; font-weight: 600; }
+.p1 .hero { margin-top: 64px; max-width: 640px; }
+.p1 .tag { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 6px 14px; font-size: .72rem; }
+.p1 .tag i { width: 9px; height: 9px; border-radius: 50%; background: #e8b04a; }
+.p1 h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.6rem, 8cqw, 5rem); line-height: .98; margin: 22px 0 14px; }
+.p1 .sub { margin: 0 0 24px; color: #cfc8bc; max-width: 40ch; line-height: 1.5; }
+.p1 .cta { display: inline-block; background: #f6f2ea; color: #1c1916; font-weight: 600; padding: 13px 24px; border-radius: 999px; font-size: .95rem; }
+.p1 .tl { margin-top: auto; padding-top: 52px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.p1 .tl div { position: relative; border-top: 2px dashed rgba(255,255,255,.35); padding: 14px 10px 0 0; font-size: .85rem; }
+.p1 .tl div::before { content: ""; position: absolute; top: -6px; left: 0; width: 10px; height: 10px; border-radius: 50%; background: #f2ede5; }
+.p1 .tl div.next::before { background: #e8b04a; box-shadow: 0 0 0 5px rgba(232,176,74,.25); }
+.p1 .tl b { display: block; font-weight: 600; margin-top: 4px; }
+.p1 .stats { display: flex; flex-wrap: wrap; gap: 8px 40px; margin-top: 34px; color: #cfc8bc; font-size: .85rem; }
+.p1 .stats strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.9rem; color: #f2ede5; }
+
+/* ---------- 02 mission control ---------- */
+.p2 { background: radial-gradient(90% 70% at 30% 20%, #17353f 0%, #0b1a20 60%, #07110f 100%); color: #d7e5e8; }
+.p2 .tabs { align-self: center; display: flex; gap: 2px; padding: 4px; background: rgba(255,255,255,.07); border-radius: 12px; font-size: .82rem; }
+.p2 .tabs span { padding: 7px 18px; border-radius: 9px; color: #9db6bc; }
+.p2 .tabs .on { background: rgba(255,255,255,.14); color: #fff; }
+.p2 .mid { display: grid; grid-template-columns: 1fr minmax(240px, 300px); gap: 24px; align-items: center; margin: 36px 0 28px; flex: 1; }
+.p2 .ringbox { display: grid; place-items: center; }
+.p2 .ring { width: min(280px, 60cqw); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#7fd1c0 0 74%, rgba(255,255,255,.1) 0); display: grid; place-items: center; }
+.p2 .ring div { width: 84%; aspect-ratio: 1; border-radius: 50%; background: #0b1a20; display: grid; place-items: center; text-align: center; }
+.p2 .ring strong { font-size: clamp(2.4rem, 8cqw, 3.6rem); font-weight: 600; display: block; line-height: 1; }
+.p2 .ring span { font-size: .72rem; color: #8fb0b8; }
+.p2 .call { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 18px; }
+.p2 .call small { color: #8fb0b8; }
+.p2 .call h3 { margin: 6px 0 14px; font-size: 1.15rem; font-weight: 600; }
+.p2 .row { display: flex; justify-content: space-between; font-size: .78rem; color: #a8c1c7; margin-top: 10px; }
+.bar { height: 3px; background: rgba(255,255,255,.14); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: #7fd1c0; }
+.p2 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.p2 .tile { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 12px 14px; font-size: .8rem; color: #a8c1c7; }
+.p2 .tile b { display: block; color: #fff; font-weight: 600; font-size: .95rem; margin: 3px 0 2px; }
+.p2 .tile .ic { width: 22px; height: 22px; border: 1.5px solid #7fd1c0; border-radius: 50%; margin-bottom: 8px; position: relative; }
+.p2 .tile .ic::after { content: ""; position: absolute; inset: 5px; border: 1.5px solid #7fd1c0; border-radius: 50%; opacity: .6; }
+@container (max-width: 640px) { .p2 .mid { grid-template-columns: 1fr; } }
+
+/* ---------- 03 gradebook card ---------- */
+.p3 { background: #f2f3f4; color: #1f2327; display: grid; place-items: center; padding: 28px 16px; box-sizing: border-box; }
+.p3 .card { width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.05); }
+.p3 .mark { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #34479e; display: grid; place-items: center; margin: 0 auto 10px; color: #34479e; font-family: var(--serif); font-size: 1.4rem; }
+.p3 h3 { text-align: center; margin: 0; color: #34479e; font-size: 1.35rem; }
+.p3 .card > p { text-align: center; color: #6a7075; margin: 2px 0 22px; font-size: .95rem; }
+.p3 label { font-size: .8rem; color: #50565b; }
+.p3 ul { list-style: none; margin: 8px 0 20px; padding: 0; display: grid; gap: 8px; }
+.p3 li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #dde0e3; border-radius: 10px; background: #f6f9ff; font-size: .92rem; }
+.p3 li small { margin-left: auto; color: #6a7075; white-space: nowrap; }
+.p3 li i { width: 18px; height: 18px; border: 2px solid #34479e; border-radius: 5px; flex: none; }
+.p3 .btn { display: block; text-align: center; padding: 13px; border-radius: 10px; font-weight: 600; background: #34479e; color: #fff; }
+.p3 .btn.o { background: #fff; color: #34479e; border: 1.5px solid #34479e; margin-top: 10px; }
+.p3 .note { width: min(460px, 100%); margin-top: 14px; border: 2px solid #34479e; border-radius: 14px; padding: 16px; text-align: center; color: #34479e; font-weight: 700; background: #fff; box-sizing: border-box; }
+.p3 .foot { margin-top: 14px; color: #9a9fa4; font-size: .82rem; }
+.p3 .wrapc { display: grid; justify-items: center; }
+
+/* ---------- 04 blueprint ---------- */
+.p4 { background-color: #e4e7e8; background-image: linear-gradient(rgba(40,110,200,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(40,110,200,.16) 1px, transparent 1px); background-size: 48px 48px; color: #14181c; }
+.p4 .note { font-family: var(--mono); font-size: .72rem; color: #3a74c4; line-height: 1.6; }
+.p4 .wm { font-family: var(--serif); font-style: italic; font-size: 2rem; color: #2c7be5; margin-top: 10px; }
+.p4 .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: center; flex: 1; margin: 20px 0; }
+.p4 svg { width: 100%; height: auto; background: rgba(255,255,255,.35); border: 1px solid rgba(40,110,200,.5); }
+.p4 .panel { border: 1px solid rgba(40,110,200,.5); background: rgba(255,255,255,.7); }
+.p4 .panel p { margin: 0; padding: 13px 16px; color: #fff; display: flex; justify-content: space-between; font-size: 1.15rem; }
+.p4 .panel p sup { font-size: .6rem; margin-right: 8px; opacity: .8; }
+.p4 .panel p:nth-child(1) { background: rgba(95,175,240,.92); } .p4 .panel p:nth-child(2) { background: rgba(45,140,235,.95); } .p4 .panel p:nth-child(3) { background: rgba(55,105,175,.96); }
+.p4 .panel h3 { margin: 0; padding: 70px 16px 16px; font-size: 1.7rem; line-height: 1.1; font-weight: 600; }
+.p4 .panel h3 em { font-style: normal; color: #2c7be5; }
+.p4 .bot { font-family: var(--mono); font-size: .72rem; color: #3a74c4; display: flex; flex-wrap: wrap; gap: 8px 28px; border-top: 1px solid rgba(40,110,200,.4); padding-top: 12px; }
+@container (max-width: 700px) { .p4 .grid { grid-template-columns: 1fr; } }
+
+/* ---------- 05 giant type ---------- */
+.p5 { background: #090909; color: #fff; }
+.p5 .logo { font-family: var(--wide); font-weight: 700; font-size: 1rem; letter-spacing: -.02em; }
+.p5 .mid { text-align: center; margin: auto; max-width: 620px; padding-bottom: 150px; }
+.p5 h3 { font-family: var(--wide); font-weight: 700; font-size: clamp(2.2rem, 7.5cqw, 4.6rem); line-height: .98; margin: 0 0 16px; letter-spacing: -.03em; }
+.p5 .mid p { margin: 0 0 22px; color: #b9b9b9; }
+.p5 .cta { display: inline-block; padding: 12px 26px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); font-size: .78rem; letter-spacing: .12em; font-weight: 600; text-transform: uppercase; }
+.p5 .big { position: absolute; left: 0; right: 0; bottom: -.2em; text-align: center; font-family: var(--wide); font-weight: 700; font-size: clamp(110px, 26cqw, 300px); line-height: .82; background: linear-gradient(180deg, #fff 20%, #5a5a5a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; z-index: 1; pointer-events: none; }
+.p5 .fc { position: absolute; z-index: 2; width: 150px; padding: 12px; border-radius: 14px; font-size: .78rem; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.p5 .fc b { display: block; font-size: .95rem; margin-top: 4px; }
+.p5 .a { top: 14%; left: 6%; transform: rotate(-9deg); background: linear-gradient(135deg, #222, #5b2d12 70%, #e0702e); }
+.p5 .b { top: 10%; left: 36%; transform: rotate(5deg); background: #eceae6; color: #151515; width: 120px; }
+.p5 .c { top: 16%; right: 8%; transform: rotate(8deg); background: linear-gradient(135deg, #1a2233, #345f9e); }
+.p5 .d { top: 52%; right: 6%; transform: rotate(-6deg); background: linear-gradient(135deg, #2a2a2a, #6b6b6b); }
+.p5 .e { top: 54%; left: 5%; transform: rotate(7deg); background: #d9e4d3; color: #17210f; }
+@container (max-width: 700px) { .p5 .b, .p5 .d { display: none; } .p5 .fc { width: 120px; } }
+
+/* ---------- 06 calm list ---------- */
+.p6 { background: #fbfbfb; color: #1b1d1f; }
+.p6 .in { max-width: 640px; margin: 0 auto; width: 100%; padding-top: 44px; }
+.p6 h3 { font-size: 2.6rem; font-weight: 500; letter-spacing: -.03em; margin: 0 0 4px; }
+.p6 .date { color: #8a8f94; margin-bottom: 28px; }
+.p6 h4 { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: #8a8f94; margin: 26px 0 8px; font-weight: 600; }
+.p6 .it { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #ececec; }
+.p6 .it i { width: 22px; height: 22px; border: 1.6px solid #b5b9bd; border-radius: 50%; flex: none; }
+.p6 .it.done { color: #a2a6aa; text-decoration: line-through; } .p6 .it.done i { background: #1b1d1f; border-color: #1b1d1f; }
+.p6 .it small { margin-left: auto; color: #8a8f94; }
+.p6 .it .dot { width: 7px; height: 7px; border-radius: 50%; background: #2b5be0; }
+.p6 .cap { margin-top: auto; padding-top: 30px; }
+.p6 .cap div { border: 1px solid #e3e5e7; border-radius: 12px; padding: 14px 16px; color: #8a8f94; background: #fff; }
+
+/* ---------- 07 bento ---------- */
+.p7 { background: #e9edf2; color: #12161c; }
+.p7 .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 12px; flex: 1; }
+.p7 .t { border-radius: 20px; padding: 16px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; font-size: .85rem; }
+.p7 .t small { color: #66707b; }
+.p7 .t strong { font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+.p7 .big { grid-column: span 2; grid-row: span 2; background: #14182a; color: #fff; }
+.p7 .big small { color: #a7aed0; } .p7 .big strong { font-size: 2.6rem; }
+.p7 .big .cta { align-self: flex-start; background: #2f5bff; color: #fff; padding: 10px 18px; border-radius: 999px; font-weight: 600; }
+.p7 .y { background: #ffe08a; } .p7 .y small { color: #6a5a1f; }
+.p7 .bars { display: flex; align-items: flex-end; gap: 5px; height: 56px; }
+.p7 .bars i { flex: 1; background: #2f5bff; border-radius: 4px; opacity: .85; } .p7 .bars i.hot { background: #e8742d; opacity: 1; }
+.p7 .dots { display: flex; gap: 4px; } .p7 .dots i { width: 14px; height: 14px; border-radius: 50%; background: #2f5bff; } .p7 .dots i.late { background: #c9d3ff; }
+.p7 .wide { grid-column: span 2; }
+@container (max-width: 700px) { .p7 .bento { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- 08 week ---------- */
+.p8 { background: #0e1424; color: #dfe5f5; }
+.p8 header, .p8 .hd { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+.p8 h3 { font-family: var(--serif); font-weight: 400; font-size: 2.4rem; margin: 0; }
+.p8 .warn { font-size: .8rem; color: #f3c37a; border: 1px solid rgba(243,195,122,.4); border-radius: 999px; padding: 5px 12px; }
+.p8 .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 22px; flex: 1; min-width: 0; }
+.p8 .day { position: relative; border-left: 1px dashed rgba(255,255,255,.14); min-height: 400px; padding-left: 6px; }
+.p8 .day > b { font: 500 .72rem var(--mono); color: #8f9bbd; display: block; }
+.p8 .load { height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; margin: 8px 0; overflow: hidden; } .p8 .load i { display: block; height: 100%; background: #7d9bff; } .p8 .load i.hot { background: #f3c37a; }
+.p8 .blk { position: absolute; left: 6px; right: 2px; border-radius: 8px; padding: 5px 7px; font-size: .68rem; line-height: 1.25; overflow: hidden; color: #0e1424; font-weight: 600; }
+.c1 { background: #9db6ff; } .c2 { background: #86e0c3; } .c3 { background: #f4b6c8; } .c4 { background: #f3c37a; }
+@container (max-width: 700px) { .p8 .week { grid-template-columns: repeat(7, minmax(78px, 1fr)); overflow-x: auto; } }
+
+/* ---------- 09 focus ---------- */
+.p9 { background: radial-gradient(80% 70% at 50% 40%, #12342f 0%, #0a1513 60%, #060b0a 100%); color: #e4f1ee; text-align: center; }
+.p9 .in { align-items: center; justify-content: center; gap: 8px; }
+.p9 small { color: #8db5ac; letter-spacing: .1em; text-transform: uppercase; font-size: .72rem; }
+.p9 .dial { width: min(300px, 70cqw); aspect-ratio: 1; border-radius: 50%; margin: 18px 0; display: grid; place-items: center; background: conic-gradient(#8ee3cd 0 8%, rgba(255,255,255,.09) 0); animation: breathe 6s ease-in-out infinite; }
+.p9 .dial div { width: 96%; aspect-ratio: 1; border-radius: 50%; background: #0a1513; display: grid; place-items: center; }
+.p9 .dial strong { font-family: var(--serif); font-weight: 400; font-size: clamp(3.4rem, 12cqw, 5.4rem); line-height: 1; }
+@keyframes breathe { 50% { transform: scale(1.025); } }
+@media (prefers-reduced-motion: reduce) { .p9 .dial { animation: none; } }
+.p9 .cta { background: #e4f1ee; color: #0a1513; font-weight: 700; padding: 14px 28px; border-radius: 999px; }
+.p9 .alt { color: #8db5ac; margin-top: 10px; font-size: .9rem; }
+.p9 .quiet { margin-top: 26px; font: .72rem var(--mono); color: #6f9a91; }
+
+/* ---------- 10 hobby heatmap ---------- */
+.p10 { background: #17181a; color: #ecebe8; }
+.p10 h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.4rem, 7cqw, 4rem); margin: 0; line-height: 1; }
+.p10 .lead { color: #aaa9a4; margin: 10px 0 24px; max-width: 52ch; line-height: 1.5; }
+.p10 .heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; }
+.p10 .heat i { aspect-ratio: 1; border-radius: 3px; background: #26282b; }
+.p10 .heat i.l1 { background: #5b4217; } .p10 .heat i.l2 { background: #9a6d1d; } .p10 .heat i.l3 { background: #d9992a; } .p10 .heat i.l4 { background: #f6c260; }
+.p10 .stats { display: flex; flex-wrap: wrap; gap: 10px 36px; margin: 24px 0; font: .78rem var(--mono); color: #aaa9a4; }
+.p10 .stats strong { display: block; font: 500 1.5rem var(--ui); color: #f6c260; }
+.p10 .ms { display: grid; gap: 8px; margin-top: auto; font-size: .88rem; color: #cfcdc8; }
+.p10 .ms div { border-top: 1px solid #2c2e31; padding-top: 8px; display: flex; justify-content: space-between; gap: 12px; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Ten looks for the Today screen</h1>
+  <p>Same content in every frame: Tuesday, Nov 10, with devotional, Algebra II, a chemistry lab report due Thursday, and a guitar streak. Rate each one Love, Meh or Hate, then copy your picks at the bottom and send them back.</p>
+</header>
+
+<figure id="f1">
+  <div class="frame p1"><div class="in">
+    <div class="nav"><span class="on">Today</span><span>Week</span><span>School</span><span>Life</span></div>
+    <div class="hero">
+      <div class="tag mono"><i></i> TUE · NOV 10</div>
+      <h3>Three things<br>today.</h3>
+      <p class="sub">The Algebra quiz is at 2:10. Everything else can wait until after.</p>
+      <span class="cta">Start for 5 minutes</span>
+    </div>
+    <div class="tl mono">
+      <div>8:00<b>Devotional</b>on time</div><div>9:15<b>Algebra II</b>room 204</div><div>11:00<b>Chem lab</b>report due Thu</div><div class="next">2:10<b>Algebra quiz</b>next up</div>
+    </div>
+    <div class="stats"><span><strong>3</strong>due today</span><span><strong>2h 15m</strong>planned</span><span><strong>4 days</strong>guitar streak</span></div>
+  </div></div>
+  <figcaption><div><h2><span>01</span>Cinematic Timeline</h2><p>Dark and moody, serif headline, one glass nav pill, a dashed timeline of the day. Closest to the Traced reference.</p></div><div class="rate" data-id="01 Cinematic Timeline"></div></figcaption>
+</figure>
+
+<figure id="f2">
+  <div class="frame p2"><div class="in">
+    <div class="tabs"><span class="on">Mission</span><span>Week</span><span>Courses</span><span>Habits</span><span>Review</span></div>
+    <div class="mid">
+      <div class="ringbox"><div class="ring"><div><span><strong>74%</strong><span>WEEK LOAD</span></span></div></div></div>
+      <div class="call"><small class="mono">DUE THU 9:00</small><h3>Chemistry lab report</h3>
+        <div class="row"><span>Estimated</span><span>90 min</span></div><div class="row"><span>Suggested</span><span>Wed 4:00 pm</span></div>
+        <div class="bar"><i style="width:15%"></i></div></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="ic"></div>Algebra II<b>6 of 8 problems</b><div class="bar"><i style="width:75%"></i></div></div>
+      <div class="tile"><div class="ic"></div>AP Lit essay<b>Draft 2</b><div class="bar"><i style="width:40%"></i></div></div>
+      <div class="tile"><div class="ic"></div>Guitar<b>3 of 4 sessions</b><div class="bar"><i style="width:75%"></i></div></div>
+      <div class="tile"><div class="ic"></div>Devotional<b>9 of 10 on time</b><div class="bar"><i style="width:90%"></i></div></div>
+      <div class="tile"><div class="ic"></div>Reading<b>18 pages/day</b><div class="bar"><i style="width:60%"></i></div></div>
+    </div>
+  </div></div>
+  <figcaption><div><h2><span>02</span>Mission Control</h2><p>Dashboard HUD: tab pill on top, big workload ring, one callout, a bottom grid of progress tiles. Closest to the drone dashboard.</p></div><div class="rate" data-id="02 Mission Control"></div></figcaption>
+</figure>
+
+<figure id="f3">
+  <div class="frame p3"><div class="wrapc">
+    <div class="card">
+      <div class="mark">S</div><h3>Studyboard</h3><p>Good morning, Bryan</p>
+      <label>Due soon</label>
+      <ul>
+        <li><i></i>Algebra II quiz<small>Today 2:10 pm</small></li>
+        <li><i></i>Chemistry lab report<small>Thu 9:00 am</small></li>
+        <li><i></i>AP Lit essay draft<small>Fri 8:00 am</small></li>
+      </ul>
+      <span class="btn">Add assignment</span><span class="btn o">Quick capture</span>
+    </div>
+    <div class="note">Devotional: 9 of 10 on time this month</div>
+    <div class="foot">Grades &nbsp;·&nbsp; Attendance &nbsp;·&nbsp; Devotional</div>
+  </div></div>
+  <figcaption><div><h2><span>03</span>Gradebook Card</h2><p>Light, familiar, institutional. White card on gray, one brand color, big clear buttons. Based on your school sign-in page.</p></div><div class="rate" data-id="03 Gradebook Card"></div></figcaption>
+</figure>
+
+<figure id="f4">
+  <div class="frame p4"><div class="in">
+    <div class="note">x: 1558.00 y: 1026.00<br>[1] Due &nbsp;[2] Planned &nbsp;[3] Habits</div>
+    <div class="wm">Studyboard</div>
+    <div class="grid">
+      <svg viewBox="0 0 600 320" role="img" aria-label="Workload curves for three courses across the week">
+        <path d="M0 200 C 90 40, 190 40, 280 190 S 470 330, 600 120" fill="none" stroke="#d63a56" stroke-width="3"/>
+        <path d="M0 120 C 100 260, 200 270, 300 140 S 480 20, 600 200" fill="none" stroke="#e8a93a" stroke-width="3"/>
+        <path d="M0 250 C 120 80, 220 90, 310 220 S 470 300, 600 80" fill="none" stroke="#2f9e62" stroke-width="3"/>
+        <path d="M0 160 C 90 300, 200 300, 290 170 S 460 60, 600 160" fill="none" stroke="#7a52d9" stroke-width="3"/>
+        <path d="M0 90 C 110 210, 210 220, 310 100 S 470 150, 600 250" fill="none" stroke="#2c7be5" stroke-width="3"/>
+      </svg>
+      <div class="panel">
+        <p><span><sup>1</sup>Due today</span><span>3</span></p><p><span><sup>2</sup>Study blocks</span><span>4</span></p><p><span><sup>3</sup>Habits</span><span>2 / 3</span></p>
+        <h3>Studyboard plans your week around <em>the hard days.</em></h3>
+      </div>
+    </div>
+    <div class="bot"><span>Assignments 12</span><span>Hours planned 14.5</span><span>On time 90%</span><span>TUE 11.10.26</span></div>
+  </div></div>
+  <figcaption><div><h2><span>04</span>Blueprint</h2><p>Light grid paper, mono annotations, colored curves for workload, a numbered translucent list. Closest to the Superscript reference.</p></div><div class="rate" data-id="04 Blueprint"></div></figcaption>
+</figure>
+
+<figure id="f5">
+  <div class="frame p5"><div class="in">
+    <div class="logo">studyboard</div>
+    <div class="mid"><h3>3 DUE.<br>1 HARD.</h3><p>Algebra quiz at 2:10. Start with the hard one.</p><span class="cta">Start a session</span></div>
+  </div>
+  <div class="fc a">Next up<b>Algebra quiz 2:10</b></div><div class="fc b">Guitar<b>20 min</b></div><div class="fc c">AP Lit essay<b>40% done</b></div><div class="fc d">Chem report<b>due Thu</b></div><div class="fc e">Devotional<b>on time</b></div>
+  <div class="big" aria-hidden="true">TODAY</div></div>
+  <figcaption><div><h2><span>05</span>Giant Type</h2><p>Black, oversized cropped TODAY, tilted floating cards, a pill button. Closest to the Disrupt reference. Loud.</p></div><div class="rate" data-id="05 Giant Type"></div></figcaption>
+</figure>
+
+<figure id="f6">
+  <div class="frame p6"><div class="in">
+    <h3>Today</h3><div class="date">Tuesday, November 10</div>
+    <h4>Morning</h4>
+    <div class="it done"><i></i>Devotional<small>8:00</small></div>
+    <div class="it"><i></i>Algebra II: ch5 problems<small>~45m</small></div>
+    <h4>Afternoon</h4>
+    <div class="it"><i></i>Algebra quiz <span class="dot"></span><small>2:10</small></div>
+    <div class="it"><i></i>Chemistry lab report: outline<small>~30m</small></div>
+    <h4>Evening</h4>
+    <div class="it"><i></i>Guitar: 20 minutes<small>habit</small></div>
+    <div class="cap"><div>math ch5 problems due fri 9am ~45m</div></div>
+  </div></div>
+  <figcaption><div><h2><span>06</span>Calm List</h2><p>Almost nothing: a plain list, one blue dot for the hard item, a quick-capture line. The Things-style approach.</p></div><div class="rate" data-id="06 Calm List"></div></figcaption>
+</figure>
+
+<figure id="f7">
+  <div class="frame p7"><div class="in">
+    <div class="bento">
+      <div class="t big"><small>Next up in 2h 10m</small><div><strong>Algebra II quiz</strong><p style="margin:8px 0 14px;color:#a7aed0">Chapters 4 and 5. Review the 6 flagged problems first.</p></div><span class="cta">Start for 5 minutes</span></div>
+      <div class="t"><small>Focus</small><strong>25:00</strong><small>Pomodoro ready</small></div>
+      <div class="t y"><small>Chem lab report</small><strong>Due Thu</strong><small>90 min planned</small></div>
+      <div class="t"><small>Devotional on time</small><div class="dots"><i></i><i></i><i></i><i class="late"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><strong>90%</strong></div>
+      <div class="t"><small>Reading</small><strong>18 pages/day</strong><small>to finish by Dec 4</small></div>
+      <div class="t wide"><small>Week load</small><div class="bars"><i style="height:35%"></i><i style="height:55%"></i><i style="height:48%"></i><i class="hot" style="height:92%"></i><i style="height:70%"></i><i style="height:20%"></i><i style="height:12%"></i></div><small>Thursday is the crunch day</small></div>
+    </div>
+  </div></div>
+  <figcaption><div><h2><span>07</span>Bento Tiles</h2><p>Light modular tiles of different sizes, one big hero tile, one dark tile for focus. Friendly and scannable.</p></div><div class="rate" data-id="07 Bento Tiles"></div></figcaption>
+</figure>
+
+<figure id="f8">
+  <div class="frame p8"><div class="in">
+    <div class="hd"><h3>Week of Nov 10</h3><span class="warn mono">Crunch ahead: Thursday is 92% full</span></div>
+    <div class="week" id="week"></div>
+  </div></div>
+  <figcaption><div><h2><span>08</span>Week Planner</h2><p>Dark week view with study blocks colored by course and a load bar per day that warns before a crunch.</p></div><div class="rate" data-id="08 Week Planner"></div></figcaption>
+</figure>
+
+<figure id="f9">
+  <div class="frame p9"><div class="in">
+    <small>Algebra II · ch5 problems</small>
+    <div class="dial"><div><strong>25:00</strong></div></div>
+    <span class="cta">Start for 5 minutes</span>
+    <span class="alt">or start the full 25</span>
+    <div class="quiet">in-app focus mode · no shaming · log time automatically</div>
+  </div></div>
+  <figcaption><div><h2><span>09</span>Focus Room</h2><p>One thing on screen: a big serif timer and a gentle start button. Used when you open an assignment to work.</p></div><div class="rate" data-id="09 Focus Room"></div></figcaption>
+</figure>
+
+<figure id="f10">
+  <div class="frame p10"><div class="in">
+    <h3>Guitar</h3>
+    <p class="lead">One missed day is just data. Two in a row ends the streak, and the heatmap keeps every good day.</p>
+    <div class="heat" id="heat" role="img" aria-label="Practice heatmap for the last 26 weeks"></div>
+    <div class="stats"><span><strong>41.5 h</strong>total</span><span><strong>3.2 h</strong>weekly avg</span><span><strong>6 h</strong>best week</span><span><strong>82%</strong>consistency</span></div>
+    <div class="ms"><div><span>Finished the first full song</span><span class="mono">Oct 3</span></div><div><span>Learned the barre chord shapes</span><span class="mono">Sep 12</span></div></div>
+  </div></div>
+  <figcaption><div><h2><span>10</span>Hobby Heatmap</h2><p>Warm amber on graphite. A year heatmap, forgiving streak copy, milestones. For the hobby side of the app.</p></div><div class="rate" data-id="10 Hobby Heatmap"></div></figcaption>
+</figure>
+
+<section class="summary">
+  <h2>Your picks</h2>
+  <textarea id="out" readonly aria-label="Your picks">Rate the prototypes above to build your list.</textarea>
+  <button id="copy" type="button">Copy picks</button>
+</section>
+</div>
+
+<script>
+(function () {
+  var KEY = "studyboard-proto-ratings", ratings = {};
+  try { ratings = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(ratings)); } catch (e) {} }
+  function summary() {
+    var groups = { Love: [], Meh: [], Hate: [] }, any = false;
+    Object.keys(ratings).forEach(function (k) { if (groups[ratings[k]]) { groups[ratings[k]].push(k); any = true; } });
+    if (!any) return "Rate the prototypes above to build your list.";
+    return ["Love", "Meh", "Hate"].map(function (g) { return g + ": " + (groups[g].join("; ") || "none"); }).join("\n");
+  }
+  function refresh() { document.getElementById("out").value = summary(); }
+  document.querySelectorAll(".rate").forEach(function (box) {
+    var id = box.getAttribute("data-id");
+    ["Love", "Meh", "Hate"].forEach(function (label) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = label;
+      b.setAttribute("aria-pressed", ratings[id] === label ? "true" : "false");
+      b.addEventListener("click", function () {
+        ratings[id] = ratings[id] === label ? undefined : label; if (!ratings[id]) delete ratings[id];
+        box.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", ratings[id] === x.textContent ? "true" : "false"); });
+        save(); refresh();
+      });
+      box.appendChild(b);
+    });
+  });
+  refresh();
+  document.getElementById("copy").addEventListener("click", function () {
+    var ta = document.getElementById("out");
+    function fallback() { ta.removeAttribute("readonly"); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.setAttribute("readonly", ""); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).catch(fallback); else fallback();
+    this.textContent = "Copied"; var t = this; setTimeout(function () { t.textContent = "Copy picks"; }, 1500);
+  });
+
+  /* week planner (hours 8 to 20) */
+  var days = [["MON 10", 40, 0], ["TUE 11", 55, 0], ["WED 12", 62, 0], ["THU 13", 92, 1], ["FRI 14", 70, 0], ["SAT 15", 25, 0], ["SUN 16", 12, 0]];
+  var blocks = [
+    [["Algebra review", 16, 1.5, "c1"], ["Guitar", 19, 1, "c4"]],
+    [["Quiz prep", 15, 1.25, "c1"], ["Lab outline", 17, 1, "c2"], ["Guitar", 19.5, 1, "c4"]],
+    [["Lab report", 16, 1.5, "c2"], ["Essay draft", 18, 1.5, "c3"]],
+    [["Essay revise", 8.5, 1, "c3"], ["Lit reading", 15, 1.5, "c3"], ["Algebra set", 17, 1.5, "c1"], ["Lab data", 19, 1.25, "c2"]],
+    [["Essay due", 8, 1, "c3"], ["Guitar", 18, 1, "c4"]], [["Reading", 10, 1.5, "c3"]], [["Plan week", 17, .75, "c1"]]
+  ];
+  var w = document.getElementById("week");
+  days.forEach(function (d, i) {
+    var col = document.createElement("div"); col.className = "day";
+    col.innerHTML = "<b>" + d[0] + "</b><div class='load'><i class='" + (d[2] ? "hot" : "") + "' style='width:" + d[1] + "%'></i></div>";
+    blocks[i].forEach(function (b) {
+      var s = document.createElement("div"); s.className = "blk " + b[3];
+      s.style.top = "calc(34px + " + ((b[1] - 8) / 12 * 340) + "px)"; s.style.height = (b[2] / 12 * 340) + "px"; s.textContent = b[0];
+      col.appendChild(s);
+    });
+    w.appendChild(col);
+  });
+
+  /* heatmap: 26 weeks, deterministic */
+  var h = document.getElementById("heat"), seed = 7;
+  function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  for (var i = 0; i < 26 * 7; i++) {
+    var r = rnd(), c = document.createElement("i");
+    if (r > .32) c.className = "l" + Math.min(4, 1 + Math.floor((r - .32) / .17));
+    h.appendChild(c);
+  }
+  h.style.gridTemplateColumns = "repeat(26, 1fr)";
+})();
+</script>
