@@ -12,6 +12,8 @@ function saveFired(fired: Set<string>) {
   try { localStorage.setItem(KEY, JSON.stringify([...fired].slice(-200))) } catch { /* storage unavailable */ }
 }
 
+export function notify(title: string, body: string) { deliver({ key: '', title, body }) }
+
 function deliver(r: Reminder) {
   // System notification when the user has allowed it; otherwise an in-app toast
   // (Safari and many mobile browsers do not deliver background notifications reliably).

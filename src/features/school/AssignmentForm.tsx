@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { repo } from '../../data'
+import { splitIntoSteps } from '../../domain/steps'
 import type { Assignment, AssignmentType, Course, Subtask } from '../../domain/types'
+import { useLive } from '../../ui/hooks'
 import { Modal } from '../../ui/Modal'
 import { showToast } from '../../ui/toast'
 
@@ -28,7 +30,11 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
   const [notes, setNotes] = useState(draft.notes ?? '')
   const [subtasks, setSubtasks] = useState<Subtask[]>(draft.subtasks ?? [])
   const [newSub, setNewSub] = useState('')
+  const [score, setScore] = useState(draft.score !== undefined ? String(draft.score) : '')
+  const [maxScore, setMaxScore] = useState(draft.maxScore !== undefined ? String(draft.maxScore) : '')
   const [error, setError] = useState('')
+  const focused = useLive(() => (draft.id ? repo.focusSessions.byIndex('targetId', draft.id) : []), [draft.id])
+  const focusedMin = (focused ?? []).reduce((sum, f) => sum + f.minutes, 0)
 
   async function save(e: FormEvent) {
     e.preventDefault()
@@ -39,6 +45,7 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
       title: title.trim(), courseId, dueDate, dueTime: dueTime || undefined, type, priority, notes: notes.trim() || undefined,
       estimatedMinutes: estimate ? Math.max(1, Number(estimate)) : undefined,
       difficulty: difficulty ? (Number(difficulty) as 1 | 2 | 3 | 4 | 5) : undefined,
+      score: score === '' ? undefined : Number(score), maxScore: maxScore === '' ? undefined : Number(maxScore),
       subtasks, status: draft.status ?? 'todo', tags: draft.tags ?? [], attachmentIds: draft.attachmentIds ?? [],
     }
     await repo.assignments.put(record as Omit<Assignment, 'id' | 'createdAt' | 'updatedAt'> & Partial<Assignment>)
@@ -91,6 +98,13 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
           <option value={1}>Low</option><option value={2}>Normal</option><option value={3}>High</option>
         </select>
       </label>
+      <label className="field">Score (when graded)
+        <input type="number" step="any" value={score} onChange={(e) => setScore(e.target.value)} />
+      </label>
+      <label className="field">Out of
+        <input type="number" step="any" min="0" value={maxScore} onChange={(e) => setMaxScore(e.target.value)} />
+      </label>
+      {focusedMin > 0 && <p className="sub full">Focus time so far: {focusedMin} min{draft.estimatedMinutes ? ` of about ${draft.estimatedMinutes}` : ''}.</p>}
       <label className="field full">Notes
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
@@ -109,6 +123,7 @@ function FormBody({ draft, courses, today, onClose, onSaved }: { draft: Assignme
           <input value={newSub} placeholder="Add a step" aria-label="New subtask" onChange={(e) => setNewSub(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (newSub.trim()) { setSubtasks([...subtasks, { id: crypto.randomUUID(), title: newSub.trim(), done: false }]); setNewSub('') } } }} />
           <button type="button" className="btn ghost" onClick={() => { if (newSub.trim()) { setSubtasks([...subtasks, { id: crypto.randomUUID(), title: newSub.trim(), done: false }]); setNewSub('') } }}>Add</button>
+          <button type="button" className="btn ghost" onClick={() => setSubtasks([...subtasks, ...splitIntoSteps(title.trim() || 'this task', Number(estimate) || 45)])}>Split into steps</button>
         </div>
       </div>
       {error && <p className="error full" role="alert">{error}</p>}

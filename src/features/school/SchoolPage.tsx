@@ -5,6 +5,9 @@ import type { Assignment, InboxItem } from '../../domain/types'
 import { useLive, useNow } from '../../ui/hooks'
 import { AssignmentForm, type AssignmentDraft } from './AssignmentForm'
 import { AssignmentList } from './AssignmentList'
+import { AttendancePanel } from './AttendancePanel'
+import { GradesPanel } from './GradesPanel'
+import { ReadingPanel } from './ReadingPanel'
 import { CoursesPanel } from './CoursesPanel'
 import { InboxPanel } from './InboxPanel'
 import { QuickAdd } from './QuickAdd'
@@ -13,6 +16,9 @@ import { SetupWizard } from './SetupWizard'
 const TABS = [
   { id: '', label: 'Assignments' },
   { id: 'courses', label: 'Courses' },
+  { id: 'grades', label: 'Grades' },
+  { id: 'attendance', label: 'Attendance' },
+  { id: 'reading', label: 'Reading' },
   { id: 'inbox', label: 'Inbox' },
 ]
 
@@ -22,6 +28,11 @@ export function SchoolPage({ tab }: { tab: string }) {
   const assignments = useLive(() => repo.assignments.all())
   const courses = useLive(() => repo.courses.all())
   const inbox = useLive(() => repo.inbox.all())
+  const scales = useLive(() => repo.gradingScales.all())
+  const attendance = useLive(() => repo.attendance.all())
+  const notes = useLive(() => repo.classNotes.all())
+  const reading = useLive(() => repo.readingItems.all())
+  const settings = useLive(() => repo.settings.get('main'))
   const [draft, setDraft] = useState<AssignmentDraft | null>(null)
   const [fromInbox, setFromInbox] = useState<InboxItem | null>(null)
   const [wizard, setWizard] = useState(false)
@@ -33,7 +44,7 @@ export function SchoolPage({ tab }: { tab: string }) {
     return () => window.removeEventListener('studyboard:new-assignment', open)
   }, [])
 
-  if (!assignments || !courses || !inbox) return null
+  if (!assignments || !courses || !inbox || !scales || !attendance || !notes || !reading || !settings) return null
   const pendingInbox = inbox.filter((i) => !i.sorted).length
 
   function closeForm() {
@@ -78,6 +89,9 @@ export function SchoolPage({ tab }: { tab: string }) {
         </>
       )}
       {tab === 'courses' && <CoursesPanel courses={courses} />}
+      {tab === 'grades' && <GradesPanel courses={courses} assignments={assignments} scales={scales} />}
+      {tab === 'attendance' && <AttendancePanel courses={courses} records={attendance} notes={notes} today={today} rotationStart={settings.rotationStart} />}
+      {tab === 'reading' && <ReadingPanel items={reading} courses={courses} today={today} />}
       {tab === 'inbox' && <InboxPanel items={inbox} courses={courses} today={today} onSort={(d, item) => { setFromInbox(item); setDraft(d) }} />}
 
       <AssignmentForm draft={draft} courses={courses} today={today} onClose={closeForm} onSaved={onSaved} />

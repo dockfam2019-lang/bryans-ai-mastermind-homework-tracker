@@ -7,8 +7,9 @@ import { classesOn } from '../../domain/schedule'
 import type { Assignment, Course } from '../../domain/types'
 import { openAssignments } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
+import { PlanPanel } from '../plan/PlanPanel'
 
-const TABS = [{ id: '', label: 'Week' }, { id: 'month', label: 'Month' }]
+const TABS = [{ id: '', label: 'Week' }, { id: 'month', label: 'Month' }, { id: 'plan', label: 'Plan' }]
 
 export function WeekPage({ tab }: { tab: string }) {
   const now = useNow()
@@ -16,16 +17,19 @@ export function WeekPage({ tab }: { tab: string }) {
   const assignments = useLive(() => repo.assignments.all())
   const courses = useLive(() => repo.courses.all())
   const settings = useLive(() => repo.settings.get('main'))
+  const blocks = useLive(() => repo.studyBlocks.all())
   const [anchor, setAnchor] = useState(today) // any date inside the week or month being shown
   const [selected, setSelected] = useState<string | null>(null)
 
-  if (!assignments || !courses || !settings) return null
+  if (!assignments || !courses || !settings || !blocks) return null
   const weekStart = settings.weekStart
   const open = openAssignments(assignments)
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const dueOn = (d: string) => open.filter((a) => a.dueDate === d)
 
   const month = tab === 'month'
+  const plan = tab === 'plan'
+  const blocksOn = (d: string) => blocks.filter((b) => b.date === d && (b.state === 'accepted' || b.state === 'done'))
   const weeks = month ? monthGrid(anchor, weekStart) : [weekDates(anchor, weekStart)]
   const first = weeks[0][0]
   const gridLoad = loadByDay(assignments, first, weeks.length * 7)
@@ -42,19 +46,21 @@ export function WeekPage({ tab }: { tab: string }) {
   return (
     <>
       <div className="pagehead">
-        <p className="mono">{month ? 'Month' : 'Week'}</p>
-        <h1>{label}</h1>
+        <p className="mono">{plan ? 'Study blocks' : month ? 'Month' : 'Week'}</p>
+        <h1>{plan ? 'Plan' : label}</h1>
       </div>
 
       <nav className="tabs" aria-label="Calendar views">
         {TABS.map((t) => <a key={t.id} href={`#/week${t.id ? `/${t.id}` : ''}`} aria-current={tab === t.id ? 'page' : undefined}>{t.label}</a>)}
         <span className="grow" />
-        <button className="btn ghost" type="button" onClick={() => move(-1)} aria-label={month ? 'Previous month' : 'Previous week'}>‹</button>
-        <button className="btn ghost" type="button" onClick={() => setAnchor(today)}>Today</button>
-        <button className="btn ghost" type="button" onClick={() => move(1)} aria-label={month ? 'Next month' : 'Next week'}>›</button>
+        {!plan && <>
+          <button className="btn ghost" type="button" onClick={() => move(-1)} aria-label={month ? 'Previous month' : 'Previous week'}>‹</button>
+          <button className="btn ghost" type="button" onClick={() => setAnchor(today)}>Today</button>
+          <button className="btn ghost" type="button" onClick={() => move(1)} aria-label={month ? 'Next month' : 'Next week'}>›</button>
+        </>}
       </nav>
 
-      {month ? (
+      {plan ? <PlanPanel /> : month ? (
         <div className="monthgrid" role="grid" aria-label="Month calendar">
           <div className="monthhead" role="row">{weeks[0].map((d) => <span key={d} role="columnheader" className="mono">{DAY_SHORT[fromLocalDate(d).getDay()]}</span>)}</div>
           {weeks.flat().map((d) => {
@@ -86,14 +92,17 @@ export function WeekPage({ tab }: { tab: string }) {
                 {items.map((a) => (
                   <div key={a.id} className="slot due"><i className="dot" style={{ background: courseOf(a)?.color }} /><span>{a.dueTime ? formatTime(a.dueTime) : 'due'}</span><b>{a.title}</b></div>
                 ))}
-                {classes.length === 0 && items.length === 0 && <p className="sub">Free</p>}
+                {blocksOn(d).map((b) => (
+                  <div key={b.id} className="slot study"><i className="dot" style={{ background: 'var(--accent-3)' }} /><span>{b.minutes}m</span><b>{b.label ?? open.find((a) => a.id === b.assignmentId)?.title ?? 'Study'}</b></div>
+                ))}
+                {classes.length === 0 && items.length === 0 && blocksOn(d).length === 0 && <p className="sub">Free</p>}
               </section>
             )
           })}
         </div>
       )}
 
-      {month && detail && (
+      {!plan && month && detail && (
         <section className="tile" style={{ marginTop: 16 }} aria-label={`Details for ${detail}`}>
           <h2>{relativeDay(detail, today)} · {detail}</h2>
           {classesOn(courses, detail, settings.rotationStart).map(({ course, meeting }) => (

@@ -78,6 +78,7 @@ export interface StudyBlock extends Base {
   minutes: number
   state: 'suggested' | 'accepted' | 'dismissed' | 'done'
   examPrep?: boolean
+  label?: string
 }
 
 export interface InboxItem extends Base {
@@ -206,6 +207,8 @@ export interface Settings extends Base {
   notifications: boolean
   /** An "A" day, used to place A/B rotating classes. */
   rotationStart?: LocalDate
+  /** Minutes per day set aside for study blocks. Default 120. */
+  studyMinutesPerDay?: number
   seeded: boolean
 }
 

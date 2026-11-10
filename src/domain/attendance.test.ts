@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { absencesLeft, recentByType, summarizeOnTime } from './attendance'
+import { absencesLeft, onTimeStreak, recentByType, summarizeOnTime } from './attendance'
 import type { Attendance } from './types'
 
 const rec = (localDate: string, status: Attendance['status'], eventType: Attendance['eventType'] = 'devotional'): Attendance => ({
@@ -26,3 +26,17 @@ describe('attendance', () => {
     expect(absencesLeft([rec('a', 'absent'), rec('b', 'absent')], 1)).toBe(0)
   })
 })
+
+describe('onTimeStreak', () => {
+  it('counts on-time days and tolerates one late day but not two in a row', () => {
+    const rows = [rec('2026-11-02', 'on-time'), rec('2026-11-03', 'on-time'), rec('2026-11-04', 'late'), rec('2026-11-05', 'on-time'), rec('2026-11-06', 'on-time')]
+    expect(onTimeStreak(rows, 'devotional')).toBe(4)
+    const broken = [rec('2026-11-02', 'on-time'), rec('2026-11-03', 'late'), rec('2026-11-04', 'absent'), rec('2026-11-05', 'on-time')]
+    expect(onTimeStreak(broken, 'devotional')).toBe(1)
+  })
+  it('only looks at the chosen event type and returns zero with no records', () => {
+    expect(onTimeStreak([rec('2026-11-02', 'on-time', 'school')], 'devotional')).toBe(0)
+    expect(onTimeStreak([], 'school')).toBe(0)
+  })
+})
+

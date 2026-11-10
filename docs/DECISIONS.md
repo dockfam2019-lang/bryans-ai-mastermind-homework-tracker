@@ -26,6 +26,10 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 20 | Streak rule: one missed period is tolerated, two in a row end the streak; skipped, paused and frozen periods are ignored | Brief: "two-day rule". Weekly cadences apply the same rule to weeks |
 | 21 | Check-ins without a duration count as 20 minutes toward a minutes-per-week goal | Otherwise a one-tap check-in could never reach a minutes goal |
 | 22 | At most 2 streak freezes per 30 days; a week with 4 or more paused days is skipped | Keeps freezes meaningful without a punishing counter |
+| 23 | Smart scheduling is greedy: earliest due first, one block per assignment per day, at most 60 minutes, front-loaded from today; weekends get 75% of weekday time | Brief says greedy is fine for v1; energy-aware placement comes in Phase 5 |
+| 24 | Exam prep plans run backward from the exam for at most 7 days: heavy start, practice in the middle, light review the day before | Matches the exam countdown research feature |
+| 25 | The focus timer ends on a wall-clock time and survives reloads; focus minutes are added to the assignment's actual minutes | Accurate in background tabs; feeds the Phase 5 planner |
+| 26 | Devotional, school and class on-time tracking share the Attendance record; on-time streaks use the same one-miss-forgiven rule | One model, consistent with hobby streaks |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.

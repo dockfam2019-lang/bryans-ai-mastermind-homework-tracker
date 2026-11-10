@@ -7,7 +7,9 @@ import { classesOn } from '../../domain/schedule'
 import type { Assignment, Course } from '../../domain/types'
 import { dueOn, nextUp, openAssignments, overdue } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
+import { startFocus } from '../focus/focusStore'
 import { HabitsTile } from '../life/HabitsTile'
+import { createPrepBlocks, markBlockDone } from '../plan/planActions'
 import { PulseChart } from './PulseChart'
 
 function markDone(a: Assignment) {
@@ -24,8 +26,9 @@ export function TodayPage() {
   const logs = useLive(() => repo.logs.all())
   const settings = useLive(() => repo.settings.get('main'))
   const pauses = useLive(() => repo.pauses.all())
+  const blocks = useLive(() => repo.studyBlocks.all())
 
-  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses) return null
+  if (!assignments || !courses || !attendance || !hobbies || !logs || !settings || !pauses || !blocks) return null
 
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
   const next = nextUp(assignments, now)
@@ -42,6 +45,7 @@ export function TodayPage() {
   const dueCount = dueToday.length + late.length
   const classes = classesOn(courses, today, settings.rotationStart)
   const exams = examCards(assignments, today)
+  const todaysBlocks = blocks.filter((b) => b.date === today && b.state !== 'dismissed')
 
   const nextCourse = next ? courseOf(next) : undefined
   const nextAt = next ? dueAt(next.dueDate, next.dueTime) : undefined
@@ -68,7 +72,10 @@ export function TodayPage() {
                 <span>{next.estimatedMinutes ? `~${next.estimatedMinutes} min` : 'no estimate'}</span>
                 {next.difficulty && <span>{`difficulty ${next.difficulty}/5`}</span>}
               </div>
-              <button className="btn" type="button" style={{ marginTop: 'auto' }} onClick={() => markDone(next)}>Mark done</button>
+              <div className="actions" style={{ marginTop: 'auto' }}>
+                <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: next.id, title: next.title }, { quick: true })}>Start for 5 minutes</button>
+                <button className="btn ghost" type="button" onClick={() => markDone(next)}>Mark done</button>
+              </div>
             </>
           ) : (
             <>
@@ -91,6 +98,25 @@ export function TodayPage() {
           <div className="ondots" aria-label={`${onTime.onTime} of ${onTime.total} recent devotionals on time`}>
             {devotional.map((r) => <i key={r.id} className={r.status === 'on-time' ? '' : r.status} title={`${r.localDate}: ${r.status}`} />)}
           </div>
+        </section>
+
+        <section className="tile span-6" aria-label="Study blocks today">
+          <h2>Study blocks today</h2>
+          {todaysBlocks.length === 0 ? <p className="sub">Nothing planned. <a href="#/week/plan">Suggest a plan</a> and it shows up here.</p> : (
+            <ul className="list">
+              {todaysBlocks.map((b) => {
+                const a = assignments.find((x) => x.id === b.assignmentId)
+                return (
+                  <li key={b.id} className={b.state === 'done' ? 'is-done' : ''}>
+                    <i className="dot big" style={{ background: a ? courseOf(a)?.color : 'var(--muted)' }} />
+                    <span className="title"><b>{b.label ?? a?.title ?? 'Study'}</b><span className="sub">{b.minutes} min{b.state === 'suggested' ? ' · suggested' : ''}</span></span>
+                    {b.state === 'accepted' && a && <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: a.id, title: a.title })}>Start</button>}
+                    {b.state === 'accepted' && <button className="btn ghost" type="button" onClick={() => markBlockDone(b)}>Done</button>}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </section>
 
         <section className="tile span-6" aria-label="Classes today">
@@ -117,6 +143,7 @@ export function TodayPage() {
                 <div>
                   <b>{daysLeft === 0 ? 'Exam today' : daysLeft === 1 ? 'day to go' : 'days to go'}</b>
                   <p className="sub">{a.title}{courseOf(a) ? ` · ${courseOf(a)?.name}` : ''}</p>
+                  <p className="sub"><button className="linkbtn" type="button" onClick={() => createPrepBlocks(a, today)}>Plan my prep</button></p>
                   <p className="sub">{stage === 'upcoming' ? 'Plenty of time. A little each day.' : stage === 'soon' ? 'Time to start reviewing.' : stage === 'tomorrow' ? 'Tomorrow. Light review, then rest.' : 'You have prepared. Go.'}</p>
                 </div>
               </div>

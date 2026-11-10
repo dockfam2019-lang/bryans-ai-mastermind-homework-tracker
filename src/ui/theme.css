@@ -265,3 +265,22 @@ input::placeholder { color: var(--muted); }
 .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; } .photos figure { margin: 0; }
 .photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; background: var(--fill); display: block; }
 .heat i.l1, .heat i.l2, .heat i.l3, .heat i.l4 { border-radius: 3px; }
+
+/* ---------- planning (Phase 4) ---------- */
+.dock { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 40; border-radius: 22px; padding: 14px 16px; width: min(300px, calc(100vw - 32px)); display: grid; gap: 6px; }
+@media (min-width: 641px) { .dock { bottom: 24px; } }
+.dock .clock { font-size: 3rem; } .dock .actions { gap: 8px; } .dock .btn { padding: 8px 14px; font-size: 0.85rem; }
+.planday { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 8px; }
+.planday header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.planblock { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: 14px; background: var(--fill); }
+.planblock.suggested { border: 1px dashed var(--line); background: transparent; } .planblock.done .title { text-decoration: line-through; color: var(--muted); }
+.planblock .title { flex: 1; min-width: 140px; } .planblock .btn { padding: 6px 12px; font-size: 0.82rem; }
+.warn { border: 1px solid var(--warm); border-radius: 14px; padding: 12px 14px; color: var(--text); background: color-mix(in srgb, var(--warm) 14%, transparent); }
+.capbar { height: 4px; background: var(--fill-strong); border-radius: 2px; overflow: hidden; width: 140px; } .capbar i { display: block; height: 100%; background: var(--accent); } .capbar.over i { background: var(--warm); }
+.scorein { width: 72px !important; padding: 6px 8px !important; }
+.avg { font-size: clamp(2.4rem, 6vw, 3.6rem); }
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.answer { border-left: 3px solid var(--accent); padding: 8px 12px; margin-top: 10px; }
+.respond { display: flex; gap: 6px; flex-wrap: wrap; } .respond button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.respond button[aria-pressed='true'] { background: var(--text); color: var(--bg); font-weight: 600; }
+.slot.study { border-left: 3px solid var(--accent-3); }

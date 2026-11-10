@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { repo } from '../data'
+import { FocusDock } from '../features/focus/FocusDock'
 import { LifePage } from '../features/life/LifePage'
 import { ComingSoon } from '../features/placeholder/ComingSoon'
 import { SchoolPage } from '../features/school/SchoolPage'
@@ -80,6 +81,7 @@ export function App() {
       <main>
         <Page route={route} />
       </main>
+      <FocusDock />
       <ToastHost />
     </div>
   )

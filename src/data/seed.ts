@@ -37,6 +37,15 @@ export async function seedSample(repo: Repository, today: LocalDate): Promise<vo
     { ...base, courseId: algebra.id, title: 'Practice test', type: 'homework', dueDate: addDays(today, -1), priority: 2, estimatedMinutes: 60, status: 'done', completedAt: Date.now() - 86400000 },
   ]
   for (const item of items) await repo.assignments.put(item)
+  // a few graded, finished assignments so the Grades screen has something to show
+  const graded: [string, string, number, number, number][] = [
+    [algebra.id, 'Unit 4 quiz', 41, 50, -9], [algebra.id, 'Homework 4.2', 18, 20, -8], [chem.id, 'Lab 3', 46, 50, -12],
+    [chem.id, 'Unit 2 test', 83, 100, -6], [lit.id, 'Essay 1', 88, 100, -14], [lit.id, 'Reading quiz', 9, 10, -4],
+  ]
+  for (const [courseId, title, score, maxScore, offset] of graded) {
+    await repo.assignments.put({ ...base, courseId, title, type: 'homework', dueDate: addDays(today, offset), priority: 2, status: 'done', score, maxScore, progress: 1, completedAt: Date.now() + offset * 86400000 })
+  }
+  await repo.readingItems.put({ title: 'Great Expectations, chapters 8 to 14', totalPages: 120, pagesRead: 35, deadline: addDays(today, 8), courseId: lit.id })
 
   // ten school days of devotional attendance, one late
   const att: Omit<Attendance, 'id' | 'createdAt' | 'updatedAt'>[] = []
