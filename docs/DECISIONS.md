@@ -12,6 +12,10 @@ Assumptions made on 2026-11-10 because the questions were not answered directly.
 | 6 | v1 includes: inbox, setup wizard, exam countdown and prep plan, GPA scales, attendance, reading tracker, workload heatmap, energy windows, 5-minute start | Cheap, high-value additions. |
 | 7 | Deferred: flashcards (S7), calendar subscription feeds, study with friends, recap image sharing | Flashcards are large; feeds and live sessions need a server. |
 | 8 | Focus lock is an in-app focus mode, not a device lock | Web apps cannot lock a phone. |
+| 9 | UI: one design system, two registers: Cinematic (dark, default) for Today/hobbies/insights and Gradebook (light) for school screens | Based on the five reference screenshots; see docs/UI.md |
+| 10 | Overdue items use warmth and size, not red alarms | Calm planner principle; matches the no-guilt rules |
+| 11 | No accounts or sign-in screen in v1; the gradebook sign-in reference is used only for card style | Studyboard is local-first |
+| 12 | Reference screenshots are not stored in the repo; no logos or assets copied | One screenshot contained a personal email and a school seal |
 
 ## Still open
 - Git name and email are not set locally, so commits from the local clone are blocked until they are.
