@@ -1,6 +1,6 @@
 # Homework & Life Tracker Research
 
-As of 2026-11-10. Star counts, languages and push dates came from the GitHub CLI on that date. Everything else comes from web search snippets and was not opened or tested. Some GitHub searches returned no results, so projects may be missing. See [ROADMAP.md](../ROADMAP.md) for the build plan.
+As of 2026-11-10. Star counts, languages and push dates came from the GitHub CLI on that date. Everything else comes from web search snippets and was not opened or tested. Some GitHub searches returned no results, so projects may be missing. See [ROADMAP.md](../ROADMAP.md) for the build plan, [BRIEF.md](BRIEF.md) for the original Studyboard brief, and [UI.md](UI.md) for the UI direction.
 
 ## Summary
 
@@ -111,6 +111,43 @@ The group-accountability tools that exist are Notion templates, mostly paid, and
 | [Study Group Orbit Manager](https://notionhub-6jk.pages.dev/en/templates/study-group-orbit-manager/) | Free | Attendance tracker, task board, exam countdown |
 
 Cautions from the sources: shared Notion templates may expose members' projects and tasks to each other, and a completed task shows the work was done, not that the member understood it.
+
+## Studyboard feature research (provided by Bryan, not independently verified)
+
+The Studyboard brief and its additions list were written or collected by Bryan; the full text is in [BRIEF.md](BRIEF.md). Sources named there were not opened or checked by us.
+
+| Feature | Credited source | Where it lands |
+| --- | --- | --- |
+| Exam countdown cards and backward prep plan | StudyFlow, My Study Life | S1 (cards), S3 (prep plan) |
+| Flashcards with spaced repetition | RemNote, Revu | S7 |
+| Custom grading scales, "what do I need" | Kuibl | S3 |
+| Workload heatmap (crunch weeks) | a student planner paper | S4 |
+| "Start for 5 minutes", task splitting, focus mode | a college time-management app paper | S3 |
+| Energy-aware scheduling | Lifestack | S4 |
+| Breaks, burnout warning, mood check-in | an article on burnout | S4 |
+| Attendance, class notes, classes you can still miss | brief | S3 |
+| Study with friends (synced Pomodoro) | brief | S5 stub |
+| Reading and paper tracker | brief | S3 |
+| Semester setup wizard | brief | S1 |
+| No paywalled basics | review complaints cited in brief | Principle |
+| Semester recap as an image | brief | S4 |
+| Calendar subscription feeds | brief | v2 backlog |
+| Quick-capture inbox | brief | S1 |
+
+## UI and design research
+
+Five searches run on 2026-11-10. Most sources are blogs and vendor pages, so the figures below are starting points to test, not standards. The only firm standard is the WCAG contrast ratio (4.5:1 for normal text, 3:1 for large text). The direction itself is in [UI.md](UI.md).
+
+| Topic | Finding | Source |
+| --- | --- | --- |
+| Glass and contrast | Contrast on translucent surfaces shifts with the background; check against the worst case. Remedies: more opaque glass, darker tint behind text, text shadow. | [Axess Lab](https://axesslab.com/?p=5111), [CSS glassmorphism best practices](https://lifa-su.github.io/blog/ai-css-glassmorphism-accessible-design.html) |
+| Glass performance | `backdrop-filter` is costly on mobile GPUs. Suggested limits: blur about 6 to 8px on mobile, 2 to 3 glass elements per screen. Don't animate it. Unverified numbers. | [OpenReplay](https://blog.openreplay.com/create-glassmorphic-ui-css/), [DEV Community](https://dev.to/alphashark/glassmorphism-in-css-the-frosted-glass-effect-done-right-4fho) |
+| Glass fallbacks | Use `prefers-reduced-transparency` for a solid background, wrap styles in `@supports`, keep the `-webkit-backdrop-filter` prefix for Safari. | [CSS glassmorphism best practices](https://lifa-su.github.io/blog/ai-css-glassmorphism-accessible-design.html) |
+| 2026 trends | Oversized type and dark-first design are well supported across sources. Serif/sans pairing and floating cards are thinner; one source says frosted glass peaked around 2021. | [Line25](https://line25.com/articles/web-design-trends-2026/), [Hostinger](https://www.hostinger.com/uk/tutorials/web-design-trends/) |
+| Animation libraries | Motion suits state-driven React UI (enter/exit, layout, gestures); GSAP suits scroll-heavy work; the View Transitions API handles page changes with no library. Bundle sizes vary by source (Motion about 30 to 34 KB gzipped, about 4.6 KB with lazy loading). | [Motion vs GSAP](https://motion.dev/docs/gsap-vs-motion), [OpenReplay](https://blog.openreplay.com/replace-animation-libraries-native-web-apis/) |
+| Reduced motion | Motion supports `reducedMotion="user"`; for View Transitions pass a zero duration. | [Motion vs GSAP](https://blog.openreplay.com/motion-vs-gsap/) |
+| Calm planner design | Remove urgency cues (red badges, "overdue" labels, guilt reminders); Things 3 is cited for restraint. Sources are review blogs, several promoting their own apps; nothing found on Linear's design approach. | [Calm planning apps](https://staycomposed.pages.dev/best/calm-planning-apps), [ClickUp minimalist apps](https://clickup.com/blog/minimalist-to-do-list-apps/) |
+| Blueprint aesthetic | Thin grid lines, monospace labels, crop marks and dashed dimension lines; the grid must stay subtle. Thin on editorial and data-viz guidance. | [Setproduct](https://www.setproduct.com/blog/complete-guide-to-blueprint-grid-design) |
 
 ## Patterns across projects
 
