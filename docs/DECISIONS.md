@@ -1,0 +1,18 @@
+# Decisions and assumptions
+
+Assumptions made on 2026-11-10 because the questions were not answered directly. Change any of these and the roadmap follows.
+
+| # | Decision | Why |
+| --- | --- | --- |
+| 1 | Studyboard replaces the earlier Next.js plan, in this same repo | The Studyboard brief is the newer, more detailed spec. Research and roadmap are kept. |
+| 2 | Single-user and local-first; no accounts or server in v1 | Matches the brief. Group features (shared board, partner verification) move to the v2 backlog. |
+| 3 | Dexie/IndexedDB behind a repository interface | Simpler and less risky than SQLite-WASM on OPFS; swappable later. |
+| 4 | On-time tracking for devotional and school is an `Attendance` record with an event type | Reuses the class attendance feature instead of building a second one. |
+| 5 | The "AI homework planner" is difficulty ratings plus energy windows plus actual-vs-estimated time | Treated as finding the best day and time to do each assignment, not literal arbitrage. |
+| 6 | v1 includes: inbox, setup wizard, exam countdown and prep plan, GPA scales, attendance, reading tracker, workload heatmap, energy windows, 5-minute start | Cheap, high-value additions. |
+| 7 | Deferred: flashcards (S7), calendar subscription feeds, study with friends, recap image sharing | Flashcards are large; feeds and live sessions need a server. |
+| 8 | Focus lock is an in-app focus mode, not a device lock | Web apps cannot lock a phone. |
+
+## Still open
+- Git name and email are not set locally, so commits from the local clone are blocked until they are.
+- Whether the earlier group features (partner verification, shared board, MCP server) should come back after v1.
