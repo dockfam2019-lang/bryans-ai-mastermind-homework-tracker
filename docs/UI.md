@@ -1,5 +1,7 @@
 # Studyboard UI direction
 
+> **Update (after three prototype rounds):** the chosen direction is now **Cinematic Glass**: dark, warm amber glow, glass tiles over soft color, charts and heatmaps, giant numerals as accents. It replaces the two-register plan below: the light "Gradebook" register scored only 2 to 3, so school screens use the same dark system (a light theme stays optional). See [UI-FEEDBACK.md](UI-FEEDBACK.md) for scores, the taste profile and build constraints, and [prototypes/](prototypes/) for the 40 reference designs. Sections below are the initial direction and are kept for history where not superseded.
+
 One design system with two registers. The look is minimal, free-flowing and calm: big type, one accent color, layered surfaces and lots of empty space.
 
 - **Cinematic (dark):** the default. Used for Today, hobbies, focus and insights.
