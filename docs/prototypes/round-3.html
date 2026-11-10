@@ -1,0 +1,522 @@
+<title>Studyboard Prototypes Three</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout concept: twenty full-width frames (21 to 40) in one column, each followed by a 0-5 score, keep/change tags, a finalist star and a note; a live taste profile at the bottom averages scores by style trait, with past rounds included. */
+:root {
+  --bg: #f4f4f2; --fg: #181a1c; --muted: #5c6166; --line: #d9dbdc; --chip: #e7e8e8; --accent: #2b4fd8; --good: #1f8a4c; --bad: #b3402a;
+  --ui: "Manrope", system-ui, sans-serif; --serif: "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace; --wide: "Unbounded", "Manrope", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; --good: #5fd18f; --bad: #ff8a73; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; --good: #5fd18f; --bad: #ff8a73; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 64px; }
+header h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1; margin: 0 0 12px; text-wrap: balance; }
+header p { margin: 0 0 8px; max-width: 66ch; color: var(--muted); line-height: 1.55; }
+header a { color: var(--accent); }
+figure { margin: 0; display: grid; gap: 12px; }
+figcaption h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+figcaption h2 span { font-family: var(--mono); font-weight: 500; color: var(--muted); margin-right: 8px; }
+figcaption p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; max-width: 66ch; line-height: 1.45; }
+.rater { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.row .lb { font: .72rem var(--mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; min-width: 64px; }
+.sc { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--fg); font: 600 .95rem var(--mono); cursor: pointer; }
+.sc[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.scale { font: .7rem var(--mono); color: var(--muted); }
+.tg { font: inherit; font-size: .82rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.tg[data-s="1"] { border-color: var(--good); color: var(--good); }
+.tg[data-s="-1"] { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.fin { font: inherit; font-size: .82rem; font-weight: 600; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.fin[aria-pressed="true"] { background: #f5c04a; color: #1a1400; border-color: #f5c04a; }
+.note { flex: 1; min-width: 200px; font: .88rem var(--ui); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.profile { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 18px; }
+.profile h2 { margin: 0; font-size: 1.2rem; }
+.profile > p { margin: 0; color: var(--muted); max-width: 66ch; line-height: 1.5; font-size: .92rem; }
+.facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px 32px; }
+.facet h3 { margin: 0 0 8px; font: .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fr { display: grid; grid-template-columns: 112px 1fr 66px; gap: 10px; align-items: center; font-size: .85rem; padding: 3px 0; }
+.fr .tr { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; } .fr .tr i { display: block; height: 100%; background: var(--accent); }
+.fr .n { font: .72rem var(--mono); color: var(--muted); text-align: right; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
+.out { width: 100%; min-height: 200px; font: .82rem/1.5 var(--mono); background: var(--chip); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; box-sizing: border-box; resize: vertical; }
+.cp { justify-self: start; font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 999px; border: 0; background: var(--fg); color: var(--bg); cursor: pointer; }
+
+/* ---------- prototype frames ---------- */
+.frame { position: relative; overflow: hidden; border-radius: 18px; min-height: 540px; container-type: inline-size; isolation: isolate; font-family: var(--ui); color: #fff; }
+.mono { font-family: var(--mono); letter-spacing: .04em; }
+.in { position: relative; z-index: 3; padding: 26px clamp(18px, 4cqw, 44px); display: flex; flex-direction: column; min-height: 540px; box-sizing: border-box; }
+.gt { background: linear-gradient(180deg, #fff 15%, #5a5a5a 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bar { height: 3px; background: rgba(255,255,255,.15); border-radius: 2px; overflow: hidden; } .bar i { display: block; height: 100%; background: #ffb23e; }
+
+/* 21 subway */
+.p21 { background: #0b0c10; }
+.p21 .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .78rem; color: #99a; }
+.p21 .top b { font: 700 1.4rem var(--wide); letter-spacing: -.04em; color: #fff; }
+.sw { position: relative; margin: 110px 12px 0; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #7ab8ff 0 34%, #ffc24a 34% 62%, #ff7a5c 62%); }
+.sw .s { position: absolute; top: 50%; width: 26px; height: 26px; border-radius: 50%; background: #0b0c10; border: 5px solid #fff; transform: translate(-50%, -50%); }
+.sw .s.cur { border-color: #ffc24a; box-shadow: 0 0 0 7px rgba(255,194,74,.25); }
+.sw .s span { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: .8rem; text-align: center; line-height: 1.35; color: #cfcfd4; }
+.sw .s.u span { bottom: 34px; } .sw .s.d span { top: 34px; } .sw .s span b { display: block; font-size: .95rem; color: #fff; }
+.p21 .nx { margin-top: auto; } .p21 .nx small { font: .75rem var(--mono); color: #ffc24a; }
+.p21 .nx strong { display: block; font: 700 clamp(4rem, 19cqw, 12rem)/.82 var(--wide); letter-spacing: -.06em; }
+/* 22 numeral stack */
+.p22 { background: #09090a; }
+.p22 .nr { display: flex; align-items: baseline; gap: 26px; border-top: 1px solid #2a2a2e; padding: 12px 0; }
+.p22 .nr strong { font: 700 clamp(3rem, 12cqw, 7.6rem)/.9 var(--wide); letter-spacing: -.06em; min-width: 3.2ch; }
+.p22 .nr span { font: .78rem/1.5 var(--mono); color: #9a9aa0; }
+.p22 .nr:last-child strong { color: #ffb23e; }
+/* 23 month heat */
+.p23 { background: #0a0b0d; }
+.p23 .nov { font: 700 clamp(5rem, 22cqw, 13rem)/.8 var(--wide); letter-spacing: -.06em; margin: 0 0 22px; }
+.p23 .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.p23 .cal b { font: .68rem var(--mono); color: #7d7d83; font-weight: 500; }
+.p23 .cal i { font: .72rem var(--mono); font-style: normal; color: #cfcfd4; padding: 8px; border-radius: 8px; min-height: 46px; background: #17181b; }
+.p23 .cal i.today { outline: 2px solid #fff; } .p23 .cal i.hot { outline: 2px solid #ffb23e; }
+/* 24 gantt */
+.p24 { background: #0a0d12; }
+.p24 .hdr, .p24 .gr { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.p24 .gr { padding: 9px 0; border-top: 1px solid rgba(255,255,255,.08); font-size: .8rem; }
+.p24 .days { display: grid; grid-template-columns: repeat(14, 1fr); font: .66rem var(--mono); color: #7f8794; } .p24 .days .t { color: #fff; font-weight: 700; }
+.p24 .tr { position: relative; height: 22px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, transparent 1px calc(100% / 14)); }
+.p24 .bar2 { position: absolute; top: 3px; height: 16px; border-radius: 4px; background: rgba(127,208,255,.25); overflow: hidden; } .p24 .bar2 i { display: block; height: 100%; background: #7fd0ff; }
+.p24 .due { position: absolute; top: 5px; width: 12px; height: 12px; background: #ffc24a; transform: translateX(-50%) rotate(45deg); }
+.p24 h3 { font: 700 clamp(2rem, 6cqw, 3.6rem)/1 var(--wide); letter-spacing: -.05em; margin: 0 0 22px; }
+/* 25 column board */
+.p25 { background: #0b0b0d; }
+.p25 .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; flex: 1; }
+.p25 .col { border-top: 2px solid #fff; padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.p25 .col strong { font: 700 clamp(3.4rem, 12cqw, 7.5rem)/.85 var(--wide); letter-spacing: -.06em; }
+.p25 .col small { font: .72rem var(--mono); color: #8d8d93; margin-bottom: 8px; }
+.p25 .k { background: #1a1b1e; border-radius: 12px; padding: 10px 12px; font-size: .82rem; } .p25 .k small { display: block; margin: 0 0 2px; }
+.p25 .col.d .k { opacity: .5; text-decoration: line-through; }
+@container (max-width: 700px) { .p25 .cols { grid-template-columns: 1fr; } }
+/* 26 radial */
+.p26 { background: radial-gradient(70% 70% at 30% 40%, #1a1f2b 0%, #090a0d 70%); }
+.p26 .g { display: grid; grid-template-columns: minmax(260px, 1fr) 1fr; gap: 28px; align-items: center; flex: 1; }
+.p26 svg { width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+.p26 ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.p26 li { display: flex; align-items: center; gap: 12px; font-size: .9rem; border-top: 1px solid #262a35; padding-top: 10px; } .p26 li i { width: 12px; height: 12px; border-radius: 50%; flex: none; } .p26 li small { margin-left: auto; font: .72rem var(--mono); color: #8b92a5; }
+@container (max-width: 700px) { .p26 .g { grid-template-columns: 1fr; } }
+/* 27 terminal */
+.p27 { background: #070707; color: #f0b24b; font-family: var(--mono); }
+.p27 pre { margin: 0; font: 400 clamp(.72rem, 1.7cqw, .95rem)/1.65 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.p27 .d { color: #8b6a2a; } .p27 .w { color: #f5f0e6; } .p27 .g { color: #86d98f; } .p27 .cur { display: inline-block; width: .6em; height: 1.1em; background: #f0b24b; vertical-align: -.2em; animation: bl 1s steps(2) infinite; }
+@keyframes bl { 50% { opacity: 0; } } @media (prefers-reduced-motion: reduce) { .p27 .cur { animation: none; } }
+/* 28 swiss */
+.p28 { background: #ecedee; color: #0b0b0b; }
+.p28 .g { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; flex: 1; }
+.p28 .l { display: flex; flex-direction: column; }
+.p28 .l small { font: 500 .75rem var(--mono); letter-spacing: .08em; }
+.p28 .it { border-top: 3px solid #0b0b0b; padding: 12px 0 18px; font-weight: 700; font-size: 1.25rem; line-height: 1.15; display: flex; justify-content: space-between; gap: 12px; } .p28 .it span { font: 500 .78rem var(--mono); white-space: nowrap; }
+.p28 .it.n { color: #1a3cff; }
+.p28 .r { position: relative; } .p28 .r b { position: absolute; right: -.04em; bottom: -.16em; font: 700 clamp(220px, 48cqw, 560px)/.8 var(--wide); letter-spacing: -.08em; }
+@container (max-width: 700px) { .p28 .g { grid-template-columns: 1fr; } .p28 .r { min-height: 260px; } }
+/* 29 tickets */
+.p29 { background: #0e0e10; }
+.p29 .tk { position: relative; display: flex; background: #f2f2f0; color: #111; border-radius: 14px; margin: 0 0 18px; max-width: 760px; overflow: hidden; box-shadow: 0 14px 30px rgba(0,0,0,.5); }
+.p29 .tk:nth-child(even) { transform: rotate(1.2deg); margin-left: auto; } .p29 .tk:nth-child(odd) { transform: rotate(-1.2deg); }
+.p29 .tk .m { flex: 1; padding: 16px 20px; } .p29 .tk .m small { font: .68rem var(--mono); color: #666; letter-spacing: .06em; }
+.p29 .tk .m b { display: block; font: 700 1.4rem/1.1 var(--wide); letter-spacing: -.04em; margin: 4px 0; }
+.p29 .tk .s { width: 120px; padding: 16px 14px; border-left: 2px dashed #bbb; display: flex; flex-direction: column; justify-content: space-between; font: .72rem var(--mono); }
+.p29 .tk .s i { height: 26px; background: repeating-linear-gradient(90deg, #111 0 2px, transparent 2px 4px, #111 4px 5px, transparent 5px 8px); }
+.p29 .tk::before, .p29 .tk::after { content: ""; position: absolute; right: 108px; width: 20px; height: 20px; border-radius: 50%; background: #0e0e10; }
+.p29 .tk::before { top: -10px; } .p29 .tk::after { bottom: -10px; }
+.p29 h3 { font: 700 clamp(2rem, 7cqw, 4.2rem)/.95 var(--wide); letter-spacing: -.05em; margin: 0 0 24px; }
+/* 30 now / next */
+.p30 { background: #08090c; }
+.p30 .g { display: grid; grid-template-columns: 1.3fr 1fr; gap: 36px; flex: 1; align-items: end; }
+.p30 .now { font: 700 clamp(6rem, 24cqw, 15rem)/.78 var(--wide); letter-spacing: -.07em; }
+.p30 h3 { font: 600 1.7rem/1.1 var(--ui); margin: 16px 0 6px; } .p30 p { margin: 0 0 14px; color: #a2a6b0; }
+.p30 .q small { font: .72rem var(--mono); color: #ffb23e; letter-spacing: .1em; }
+.p30 .q div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #23252c; font-size: .92rem; } .p30 .q div span { font: .75rem var(--mono); color: #8b92a5; }
+@container (max-width: 700px) { .p30 .g { grid-template-columns: 1fr; } }
+/* 31 sheet */
+.p31 { background: #0b0c0e; font-family: var(--mono); }
+.p31 .scroll { overflow-x: auto; } .p31 table { width: 100%; border-collapse: collapse; font-size: .78rem; min-width: 620px; }
+.p31 th { text-align: left; color: #7f8794; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid #2c3038; letter-spacing: .06em; }
+.p31 td { padding: 10px; border-bottom: 1px solid #1b1e24; color: #dfe3ea; white-space: nowrap; } .p31 td:nth-child(3) { white-space: normal; }
+.p31 td .bar { width: 90px; display: inline-block; vertical-align: middle; margin-right: 8px; } .p31 tr.hot td { color: #ffc24a; }
+.p31 h3 { font: 700 clamp(1.6rem, 4cqw, 2.4rem) var(--wide); letter-spacing: -.05em; margin: 0 0 18px; }
+.p31 tfoot td { color: #7f8794; border: 0; }
+/* 32 pulse */
+.p32 { background: radial-gradient(90% 70% at 50% 100%, #2b1708 0%, #0b0908 65%); }
+.p32 h3 { font: 700 clamp(3.4rem, 14cqw, 8.5rem)/.85 var(--wide); letter-spacing: -.06em; margin: 0; } .p32 p { margin: 10px 0 0; color: #c7b49c; }
+.p32 svg { width: 100%; height: auto; margin-top: auto; }
+.p32 .ax { display: flex; justify-content: space-between; font: .68rem var(--mono); color: #8d7a63; margin-top: 8px; }
+/* 33 magazine */
+.p33 { background: #111114; }
+.p33 .m { display: flex; justify-content: space-between; font: .72rem var(--mono); letter-spacing: .08em; color: #aaa; border-bottom: 1px solid #3a3a40; padding-bottom: 10px; }
+.p33 h3 { font: italic 400 clamp(5rem, 22cqw, 14rem)/.85 var(--serif); margin: 14px 0 6px; letter-spacing: -.02em; text-align: center; }
+.p33 .cl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: auto; border-top: 1px solid #3a3a40; padding-top: 14px; }
+.p33 .cl div { font-size: .92rem; line-height: 1.35; color: #d0d0d5; } .p33 .cl b { display: block; font: italic 400 1.5rem/1.1 var(--serif); color: #fff; margin-bottom: 4px; }
+@container (max-width: 700px) { .p33 .cl { grid-template-columns: 1fr; } }
+/* 34 xp */
+.p34 { background: #0f1018; }
+.p34 .g { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+.p34 .lv { width: clamp(130px, 22cqw, 190px); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#ff7ab6, #ffb23e, #5fe1c2, #6aa8ff, #ff7ab6); display: grid; place-items: center; }
+.p34 .lv div { width: 88%; aspect-ratio: 1; border-radius: 50%; background: #0f1018; display: grid; place-items: center; text-align: center; font: 700 clamp(2rem, 7cqw, 3.6rem)/1 var(--wide); letter-spacing: -.05em; } .p34 .lv small { display: block; font: .65rem var(--mono); color: #aab; letter-spacing: .1em; }
+.p34 .xp .bar { height: 14px; border-radius: 7px; } .p34 .xp .bar i { background: linear-gradient(90deg, #ff7ab6, #ffb23e); }
+.p34 .xp p { margin: 8px 0 0; font: .78rem var(--mono); color: #aab; }
+.p34 .bd { display: flex; flex-wrap: wrap; gap: 14px; margin: 30px 0; }
+.p34 .bd div { width: 86px; text-align: center; font-size: .72rem; color: #ccd; } .p34 .bd i { display: block; width: 62px; height: 62px; border-radius: 18px; margin: 0 auto 6px; transform: rotate(-6deg); }
+.p34 .q { display: grid; gap: 10px; margin-top: auto; } .p34 .q div { background: #1a1b27; border-radius: 14px; padding: 12px 14px; font-size: .88rem; } .p34 .q .bar { margin-top: 8px; height: 6px; } .p34 .q .bar i { background: #5fe1c2; }
+/* 35 glass */
+.p35 { background: radial-gradient(40% 50% at 15% 20%, #ff7a3d 0%, transparent 70%), radial-gradient(45% 55% at 85% 25%, #3d7bff 0%, transparent 70%), radial-gradient(50% 60% at 55% 95%, #17c4a0 0%, transparent 70%), #0b0e14; }
+.p35 .g { display: grid; grid-template-columns: 1.4fr 1fr; grid-auto-rows: minmax(130px, auto); gap: 14px; flex: 1; }
+.p35 .gl { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 22px; padding: 18px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; flex-direction: column; justify-content: space-between; }
+.p35 .gl small { font: .72rem var(--mono); color: rgba(255,255,255,.75); letter-spacing: .06em; } .p35 .gl strong { font: 600 2.2rem/1.05 var(--ui); letter-spacing: -.03em; }
+.p35 .gl.t { grid-row: span 2; } .p35 .gl.t strong { font-size: clamp(2.6rem, 8cqw, 4.6rem); }
+.p35 .nv { align-self: center; display: inline-flex; gap: 4px; padding: 5px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); font-size: .85rem; margin-bottom: 18px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); } .p35 .nv span { padding: 7px 16px; border-radius: 999px; } .p35 .nv .on { background: #fff; color: #111; font-weight: 600; }
+@media (prefers-reduced-transparency: reduce) { .p35 .gl, .p35 .nv { background: rgba(20,24,32,.92); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+@container (max-width: 700px) { .p35 .g { grid-template-columns: 1fr; } .p35 .gl.t { grid-row: auto; } }
+/* 36 brutalist */
+.p36 { background: #f6f6f3; color: #000; }
+.p36 h3 { font: 700 clamp(2.4rem, 9cqw, 6rem)/.9 var(--wide); letter-spacing: -.05em; text-transform: uppercase; margin: 0 0 22px; }
+.p36 .g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; flex: 1; }
+.p36 .t { border: 3px solid #000; box-shadow: 7px 7px 0 #000; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 170px; }
+.p36 .t small { font: 700 .72rem var(--mono); letter-spacing: .06em; } .p36 .t strong { font: 700 clamp(2.4rem, 7cqw, 4.6rem)/.9 var(--wide); letter-spacing: -.05em; }
+.p36 .y { background: #ffe14a; } .p36 .b { background: #8aa4ff; } .p36 .p { background: #ffa6d3; } .p36 .w { background: #fff; } .p36 .w2 { grid-column: span 2; }
+@container (max-width: 700px) { .p36 .g { grid-template-columns: repeat(2, 1fr); } }
+/* 37 rings */
+.p37 { background: #0a0b0e; }
+.p37 .g { display: grid; grid-template-columns: minmax(260px, 1fr) 1fr; gap: 32px; align-items: center; flex: 1; }
+.p37 svg { width: 100%; max-width: 400px; margin: 0 auto; height: auto; }
+.p37 .lg div { display: flex; align-items: baseline; gap: 14px; padding: 14px 0; border-top: 1px solid #23252b; } .p37 .lg i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.p37 .lg strong { margin-left: auto; font: 700 clamp(1.8rem, 5cqw, 3rem)/1 var(--wide); letter-spacing: -.05em; } .p37 .lg small { font: .72rem var(--mono); color: #8b92a5; display: block; }
+.p37 h3 { font: 700 clamp(2rem, 6cqw, 3.4rem)/1 var(--wide); letter-spacing: -.05em; margin: 0; }
+@container (max-width: 700px) { .p37 .g { grid-template-columns: 1fr; } }
+/* 38 hour ruler */
+.p38 { background: #0a0a0c; }
+.p38 .rl { position: relative; height: 520px; margin-top: 8px; }
+.p38 .h { position: absolute; left: 0; right: 0; height: 64px; border-top: 1px solid #25262b; font: 700 3.2rem/1 var(--wide); letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1px #4d4f58; padding-top: 4px; } .p38 .h small { font: .65rem var(--mono); -webkit-text-stroke: 0; color: #6d6f78; margin-left: 6px; letter-spacing: .06em; }
+.p38 .e { position: absolute; left: clamp(110px, 16cqw, 190px); right: 0; border-radius: 12px; padding: 8px 14px; font-size: .88rem; color: #0a0a0c; font-weight: 700; display: flex; justify-content: space-between; gap: 10px; overflow: hidden; } .p38 .e span { font: 500 .72rem var(--mono); }
+/* 39 color blocks */
+.p39 { background: #111; padding: 6px; box-sizing: border-box; }
+.p39 .g { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 6px; min-height: 528px; }
+.p39 .t { padding: 16px; display: flex; flex-direction: column; justify-content: space-between; } .p39 .t small { font: 700 .74rem var(--mono); letter-spacing: .08em; } .p39 .t strong { font: 700 clamp(2.6rem, 9cqw, 6rem)/.85 var(--wide); letter-spacing: -.06em; }
+.p39 .a { grid-column: span 2; grid-row: span 2; background: #2b50ff; } .p39 .a strong { font-size: clamp(7rem, 26cqw, 17rem); }
+.p39 .b { background: #ffd23f; color: #111; } .p39 .c { background: #f2f2f2; color: #111; } .p39 .d { background: #000; border: 1px solid #333; } .p39 .e { background: #ff8a5b; color: #111; } .p39 .f { grid-column: span 2; background: #1c1c1c; }
+@container (max-width: 700px) { .p39 .g { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; } .p39 .a { grid-row: auto; } }
+/* 40 now playing */
+.p40 { background: radial-gradient(80% 70% at 50% 0%, #1e2a4a 0%, #080a10 70%); }
+.p40 .pl { margin: 0 auto; width: min(560px, 100%); }
+.p40 .art { display: flex; gap: 20px; align-items: center; } .p40 .art i { width: clamp(96px, 20cqw, 140px); aspect-ratio: 1; border-radius: 20px; background: linear-gradient(135deg, #5b7bff, #1a2145 70%); flex: none; box-shadow: 0 16px 34px rgba(0,0,0,.5); }
+.p40 .art b { display: block; font: 600 1.5rem/1.15 var(--ui); } .p40 .art span { color: #9aa5c4; font-size: .9rem; }
+.p40 .sb { margin: 26px 0 8px; } .p40 .sb .bar { height: 5px; } .p40 .sb .bar i { background: #fff; } .p40 .tm { display: flex; justify-content: space-between; font: .7rem var(--mono); color: #8d97b3; margin-top: 8px; }
+.p40 .ct { display: flex; justify-content: center; gap: 34px; align-items: center; margin: 18px 0 26px; } .p40 .ct i { display: block; } .p40 .pa { width: 58px; height: 58px; border-radius: 50%; background: #fff; display: grid; place-items: center; } .p40 .pa::before { content: ""; width: 16px; height: 18px; border-left: 5px solid #111; border-right: 5px solid #111; box-sizing: border-box; } .p40 .pv, .p40 .nx2 { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; } .p40 .pv { border-right: 16px solid #cdd4ea; } .p40 .nx2 { border-left: 16px solid #cdd4ea; }
+.p40 .up small { font: .7rem var(--mono); color: #8d97b3; letter-spacing: .1em; } .p40 .up div { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #1f2639; font-size: .92rem; } .p40 .up div span { font: .75rem var(--mono); color: #8d97b3; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Twenty more, and a sharper way to rank them</h1>
+  <p>Twelve of these stay close to what you loved (dark, giant numerals, timelines, columns, heatmaps, blueprint grids). Eight are wildcards: a terminal, a Swiss poster, a magazine cover, glass, brutalist, a media player and more, so we can find styles you haven't seen yet.</p>
+  <p><b>How to rank:</b> give each a 0 to 5 score (0 hate it, 2 meh, 5 love). Tap a tag once for "keep this" and twice for "change this". Star up to three finalists. The taste profile at the bottom averages your scores by style trait and includes your earlier rounds. <a href="#profile">Jump to the profile</a></p>
+</header>
+
+<figure data-n="21"><div class="frame p21"><div class="in">
+  <div class="top"><b>LINE T</b><span class="mono">TUE NOV 10 · EXPRESS TO THE ALGEBRA QUIZ</span></div>
+  <div class="sw">
+    <div class="s u" style="left:6%"><span><b>8:00</b>Devotional · on time</span></div>
+    <div class="s d" style="left:34%"><span><b>9:15</b>Algebra II</span></div>
+    <div class="s u" style="left:62%"><span><b>11:00</b>Chem lab</span></div>
+    <div class="s d cur" style="left:92%"><span><b>2:10</b>Algebra quiz</span></div>
+  </div>
+  <div class="nx"><small>NEXT STOP</small><strong class="gt">2:10</strong></div>
+</div></div></figure>
+
+<figure data-n="22"><div class="frame p22"><div class="in">
+  <div class="nr"><strong class="gt">3</strong><span>DUE TODAY<br>Algebra quiz · lab outline · guitar</span></div>
+  <div class="nr"><strong class="gt">14.5</strong><span>HOURS PLANNED THIS WEEK<br>Thursday is the crunch</span></div>
+  <div class="nr"><strong class="gt">90%</strong><span>DEVOTIONAL ON TIME<br>9 of 10 this month</span></div>
+  <div class="nr"><strong>4</strong><span>DAY GUITAR STREAK<br>One miss is just data</span></div>
+</div></div></figure>
+
+<figure data-n="23"><div class="frame p23"><div class="in">
+  <div class="nov gt">NOV</div><div class="cal" id="cal"></div>
+</div></div></figure>
+
+<figure data-n="24"><div class="frame p24"><div class="in">
+  <h3 class="gt">NEXT 14 DAYS</h3>
+  <div class="hdr"><span></span><div class="days" id="days"></div></div>
+  <div id="gantt"></div>
+</div></div></figure>
+
+<figure data-n="25"><div class="frame p25"><div class="in"><div class="cols">
+  <div class="col"><strong class="gt">5</strong><small>TO DO</small><div class="k"><small>2:10 PM</small>Algebra quiz</div><div class="k"><small>THU</small>Chem lab report</div><div class="k"><small>FRI</small>AP Lit essay</div><div class="k"><small>FRI</small>Algebra exam prep</div></div>
+  <div class="col"><strong class="gt">2</strong><small>IN PROGRESS</small><div class="k"><small>40%</small>Essay draft 2</div><div class="k"><small>15%</small>Lab outline</div></div>
+  <div class="col d"><strong class="gt">4</strong><small>DONE THIS WEEK</small><div class="k"><small>MON</small>Practice test</div><div class="k"><small>MON</small>Reading ch 6</div><div class="k"><small>TUE</small>Devotional</div></div>
+</div></div></div></figure>
+
+<figure data-n="26"><div class="frame p26"><div class="in"><div class="g">
+  <svg viewBox="0 0 300 300" id="radial" role="img" aria-label="Twelve hour day ring from 8 am to 8 pm with study blocks"></svg>
+  <ul id="rl"></ul>
+</div></div></div></figure>
+
+<figure data-n="27"><div class="frame p27"><div class="in"><pre><span class="d">$</span> <span class="w">studyboard today</span>
+TUE NOV 10 2026    <span class="w">3 due · 4 blocks · 14.5 h planned</span>
+
+<span class="d">── DUE ─────────────────────────────────────────────</span>
+[ ] <span class="w">2:10pm</span>  Algebra II quiz            ~45m   <span class="g">████████░░</span> 80%
+[ ] <span class="w">THU 9am</span> Chemistry lab report       ~90m   <span class="g">██░░░░░░░░</span> 15%
+[ ] <span class="w">FRI 8am</span> AP Lit essay draft         ~120m  <span class="g">████░░░░░░</span> 40%
+
+<span class="d">── HABITS ──────────────────────────────────────────</span>
+guitar      <span class="g">███████░░░</span> 3/4 this week   streak 4d
+devotional  <span class="g">█████████░</span> 9/10 on time    90%
+reading     <span class="g">██████░░░░</span> 18 pages/day
+
+<span class="d">── LOAD ────────────────────────────────────────────</span>
+mon ▃▃  tue ▅▅  wed ▅▅  <span class="w">thu ▇▇ crunch 92%</span>  fri ▅▅  sat ▂▂  sun ▁▁
+
+<span class="d">$</span> <span class="cur"></span></pre></div></div></figure>
+
+<figure data-n="28"><div class="frame p28"><div class="in"><div class="g">
+  <div class="l"><small>TUESDAY · NOVEMBER 2026</small><div style="height:26px"></div>
+    <div class="it n">Algebra II quiz<span>2:10 PM</span></div><div class="it">Chemistry lab report<span>THU 9:00</span></div><div class="it">AP Lit essay draft<span>FRI 8:00</span></div><div class="it">Guitar, 20 minutes<span>HABIT</span></div></div>
+  <div class="r"><b>10</b></div>
+</div></div></div></figure>
+
+<figure data-n="29"><div class="frame p29"><div class="in">
+  <h3 class="gt">3 TICKETS<br>FOR TODAY</h3>
+  <div class="tk"><div class="m"><small>ALGEBRA II · QUIZ · ROOM 204</small><b>Chapters 4 and 5</b><small>TODAY 2:10 PM · ~45 MIN</small></div><div class="s"><span>NEXT UP</span><i></i></div></div>
+  <div class="tk"><div class="m"><small>CHEMISTRY · LAB REPORT</small><b>Outline and data</b><small>DUE THU 9:00 AM · ~90 MIN</small></div><div class="s"><span>15% DONE</span><i></i></div></div>
+  <div class="tk"><div class="m"><small>HOBBY · GUITAR</small><b>Barre chord practice</b><small>EVENING · 20 MIN</small></div><div class="s"><span>STREAK 4</span><i></i></div></div>
+</div></div></figure>
+
+<figure data-n="30"><div class="frame p30"><div class="in"><div class="g">
+  <div><div class="now gt">NOW</div><h3>Algebra II quiz prep</h3><p>2 h 10 min until the quiz. Start with the 6 flagged problems.</p><div class="bar" style="width:min(380px,100%)"><i style="width:35%"></i></div></div>
+  <div class="q"><small>NEXT</small><div>Lab outline<span>3:30 PM · 30M</span></div><div>Essay draft 2<span>5:00 PM · 60M</span></div><div>Guitar<span>7:30 PM · 20M</span></div><div>Devotional prep<span>9:00 PM · 10M</span></div></div>
+</div></div></div></figure>
+
+<figure data-n="31"><div class="frame p31"><div class="in">
+  <h3 class="gt">ASSIGNMENTS</h3>
+  <div class="scroll"><table><thead><tr><th>#</th><th>COURSE</th><th>TASK</th><th>DUE</th><th>EST</th><th>PROGRESS</th></tr></thead><tbody>
+    <tr><td>01</td><td>ALG II</td><td>Unit 5 quiz</td><td>TUE 2:10p</td><td>45m</td><td><span class="bar"><i style="width:80%"></i></span>80%</td></tr>
+    <tr class="hot"><td>02</td><td>CHEM</td><td>Lab report</td><td>THU 9:00a</td><td>90m</td><td><span class="bar"><i style="width:15%"></i></span>15%</td></tr>
+    <tr><td>03</td><td>AP LIT</td><td>Essay draft 2</td><td>FRI 8:00a</td><td>120m</td><td><span class="bar"><i style="width:40%"></i></span>40%</td></tr>
+    <tr><td>04</td><td>ALG II</td><td>Unit 5 exam prep</td><td>FRI 9:00a</td><td>150m</td><td><span class="bar"><i style="width:30%"></i></span>30%</td></tr>
+    <tr><td>05</td><td>AP LIT</td><td>Reading, chapter 7</td><td>NOV 18</td><td>180m</td><td><span class="bar"><i style="width:20%"></i></span>20%</td></tr>
+    <tr><td>06</td><td>CHEM</td><td>Unit test review</td><td>NOV 20</td><td>120m</td><td><span class="bar"><i style="width:0%"></i></span>0%</td></tr>
+  </tbody><tfoot><tr><td colspan="6">6 open · 12.75 h estimated · 3 due within 3 days</td></tr></tfoot></table></div>
+</div></div></figure>
+
+<figure data-n="32"><div class="frame p32"><div class="in">
+  <h3 class="gt">14.5 H</h3><p class="mono">PLANNED OVER THE NEXT 14 DAYS · PEAK THURSDAY</p>
+  <svg id="pulse" viewBox="0 0 1000 300" role="img" aria-label="Workload over 14 days peaking on Thursday"></svg>
+  <div class="ax"><span>MON 9</span><span>THU 12</span><span>SUN 15</span><span>WED 18</span><span>SAT 21</span></div>
+</div></div></figure>
+
+<figure data-n="33"><div class="frame p33"><div class="in">
+  <div class="m"><span>NO. 46</span><span>NOVEMBER 10, 2026</span><span>FREE · ALWAYS</span></div>
+  <h3>The Week</h3>
+  <div class="cl"><div><b>Survive Thursday</b>Why 92% of your week lands on one day, and how to move it.</div><div><b>The Algebra quiz</b>Six problems that matter more than the other forty.</div><div><b>Nine of ten</b>Your devotional streak, and the one morning that slipped.</div></div>
+</div></div></figure>
+
+<figure data-n="34"><div class="frame p34"><div class="in">
+  <div class="g"><div class="lv"><div><span>LV<br>7<small>BOOKWORM</small></span></div></div><div class="xp"><div class="bar"><i style="width:80%"></i></div><p>640 / 800 XP · 160 to level 8</p><p>+25 XP finishing early · +10 per focus session</p></div></div>
+  <div class="bd"><div><i style="background:linear-gradient(135deg,#ffb23e,#ff7ab6)"></i>Early Bird</div><div><i style="background:linear-gradient(135deg,#5fe1c2,#6aa8ff)"></i>4 Day Streak</div><div><i style="background:linear-gradient(135deg,#6aa8ff,#9b7bff)"></i>Focus x10</div><div><i style="background:linear-gradient(135deg,#ff7ab6,#ff5b5b)"></i>On Time x9</div></div>
+  <div class="q"><div>Finish 3 assignments a day early<div class="bar"><i style="width:66%"></i></div></div><div>5 hobby sessions this week<div class="bar"><i style="width:60%"></i></div></div></div>
+</div></div></figure>
+
+<figure data-n="35"><div class="frame p35"><div class="in">
+  <div class="nv"><span class="on">Today</span><span>Week</span><span>School</span><span>Life</span></div>
+  <div class="g">
+    <div class="gl t"><small>NEXT UP IN 2H 10M</small><strong>Algebra II quiz</strong><small>CH 4 AND 5 · ROOM 204</small></div>
+    <div class="gl"><small>WEEK LOAD</small><strong>74%</strong></div>
+    <div class="gl"><small>DEVOTIONAL ON TIME</small><strong>9 of 10</strong></div>
+  </div>
+</div></div></figure>
+
+<figure data-n="36"><div class="frame p36"><div class="in">
+  <h3>Due. Now. Done.</h3>
+  <div class="g"><div class="t y"><small>DUE TODAY</small><strong>3</strong></div><div class="t b"><small>NEXT UP</small><strong>2:10</strong></div><div class="t p"><small>ON TIME</small><strong>90%</strong></div><div class="t w"><small>STREAK</small><strong>4D</strong></div><div class="t w w2"><small>THURSDAY</small><strong>CRUNCH</strong></div><div class="t y w2"><small>HOURS PLANNED</small><strong>14.5</strong></div></div>
+</div></div></figure>
+
+<figure data-n="37"><div class="frame p37"><div class="in"><div class="g">
+  <div><h3 class="gt">CLOSE<br>YOUR<br>RINGS</h3><svg viewBox="0 0 300 300" id="rings" role="img" aria-label="Three progress rings: study 4 of 5, hobbies 3 of 4, devotional 9 of 10"></svg></div>
+  <div class="lg"><div><i style="background:#ffb23e"></i><span>Study blocks<small>THIS WEEK</small></span><strong>4/5</strong></div><div><i style="background:#6fb4ff"></i><span>Hobby sessions<small>THIS WEEK</small></span><strong>3/4</strong></div><div><i style="background:#7fe0b5"></i><span>Devotional on time<small>THIS MONTH</small></span><strong>9/10</strong></div></div>
+</div></div></div></figure>
+
+<figure data-n="38"><div class="frame p38"><div class="in"><div class="rl" id="ruler"></div></div></div></figure>
+
+<figure data-n="39"><div class="frame p39"><div class="g">
+  <div class="t a"><small>DUE TODAY</small><strong>3</strong></div><div class="t b"><small>NEXT</small><strong>2:10</strong></div><div class="t c"><small>ON TIME</small><strong>90%</strong></div><div class="t d"><small>STREAK</small><strong>4D</strong></div><div class="t e"><small>PLANNED</small><strong>14.5H</strong></div><div class="t f"><small>THURSDAY</small><strong>92%</strong></div>
+</div></div></figure>
+
+<figure data-n="40"><div class="frame p40"><div class="in"><div class="pl">
+  <div class="art"><i></i><div><b>Algebra II quiz prep</b><span>Chapters 4 and 5 · 6 flagged problems</span></div></div>
+  <div class="sb"><div class="bar"><i style="width:50%"></i></div><div class="tm"><span>12:40</span><span>25:00</span></div></div>
+  <div class="ct"><i class="pv"></i><i class="pa"></i><i class="nx2"></i></div>
+  <div class="up"><small>UP NEXT</small><div>Lab outline<span>30M</span></div><div>Essay draft 2<span>60M</span></div><div>Guitar<span>20M</span></div></div>
+</div></div></div></figure>
+
+<section class="profile" id="profile">
+  <h2>Your taste profile</h2>
+  <p>Average score (0 to 5) for each style trait, from the designs you've rated. "n" is how many designs carry the trait. Past rounds are scored Love 5, Meh 2, Hate 0.</p>
+  <label class="opt"><input type="checkbox" id="past" checked> Include rounds one and two</label>
+  <div class="facets" id="facets"></div>
+  <h2>Send this back</h2>
+  <textarea class="out" id="out" readonly aria-label="Your scores and taste profile"></textarea>
+  <button class="cp" id="copy" type="button">Copy results</button>
+</section>
+</div>
+
+<script>
+(function () {
+  var KEYS = ["theme", "type", "layout", "data", "density", "mood", "ornament"];
+  var TAGS = ["Layout", "Type", "Color", "Density", "Mood", "Details"];
+  var META = {
+    21: ["Subway Line", "The day as a transit map: stations for events, a colored line, a giant NEXT STOP time. A timeline you've liked, in a new costume.", "dark|giant-display|timeline|none|medium|technical|flat"],
+    22: ["Numeral Stack", "Four giant numbers stacked like a poster, each with one line of meaning. Pure data, nothing else.", "dark|giant-display|list|big-number|sparse|bold|flat"],
+    23: ["Month Heat", "A month calendar shaded by workload, with a giant cropped NOV. Crunch days show up before they arrive.", "dark|giant-display|grid|heatmap|medium|technical|flat"],
+    24: ["Gantt Strip", "Every assignment as a bar across the next 14 days with a diamond on the due date. Planning at a glance.", "dark|giant-display|timeline|progress-bars|dense|technical|grid-lines"],
+    25: ["Column Board", "To do, in progress, done, each topped by a giant count. A board that reads like a scoreboard.", "dark|giant-display|columns|big-number|medium|bold|flat"],
+    26: ["Radial Day", "The day as a ring from 8 am to 8 pm with blocks as arcs. A different way to see time.", "dark|standard|radial|none|medium|cinematic|flat"],
+    27: ["Terminal", "A command-line readout: amber on black, text progress bars, a blinking cursor. Wildcard.", "dark|mono|list|progress-bars|dense|technical|flat"],
+    28: ["Swiss Poster", "Light, bold black rules, a giant cropped 10 for the date, one blue accent. Wildcard.", "light|giant-display|split|big-number|sparse|bold|flat"],
+    29: ["Ticket Stubs", "Each assignment is a paper ticket with a barcode stub, slightly tilted. Wildcard.", "dark|giant-display|floating-cards|none|medium|playful|tilted-cards"],
+    30: ["Now and Next", "A giant NOW with the current task, and a thin queue of what's next beside it.", "dark|giant-display|split|progress-bars|sparse|cinematic|flat"],
+    31: ["Spreadsheet", "A dense monospace table of everything open, with tiny progress bars. For people who like data.", "dark|mono|list|progress-bars|dense|technical|flat"],
+    32: ["Pulse Chart", "A big glowing workload curve over 14 days with the Thursday peak, under a giant hours number.", "dark|giant-display|hero-center|chart-curves|medium|cinematic|glow"],
+    33: ["Magazine Cover", "The week as a magazine: giant italic serif masthead, cover lines for what matters. Wildcard.", "dark|serif|hero-center|none|sparse|cinematic|flat"],
+    34: ["XP Badges", "Level ring, XP bar, colorful badges and weekly quests for the optional game layer. Wildcard.", "dark|standard|tiles|progress-bars|medium|playful|flat"],
+    35: ["Glass Dashboard", "Frosted translucent panels over soft color blobs, with a glass nav pill. Wildcard.", "dark|standard|tiles|big-number|medium|cinematic|glass"],
+    36: ["Brutalist", "Thick black borders, hard shadows, flat bright blocks, uppercase type. Wildcard.", "light|giant-display|tiles|big-number|medium|bold|hard-borders"],
+    37: ["Rings", "Three concentric progress rings and a big fraction per ring. Calm and game-like.", "dark|giant-display|radial|rings|sparse|calm|flat"],
+    38: ["Hour Ruler", "A vertical day: outlined giant hour numerals down the left, events as bars on the right.", "dark|giant-display|timeline|none|medium|bold|flat"],
+    39: ["Color Blocks", "Mondrian-style blocks in blue, yellow, white and black with one enormous number. Wildcard.", "light|giant-display|tiles|big-number|medium|playful|color-blocks"],
+    40: ["Now Playing", "Your current task as a media player: scrubber, controls, an up-next queue. Wildcard.", "dark|standard|split|progress-bars|sparse|calm|flat"]
+  };
+  /* past rounds: id | name | score | facets (Love 5, Meh 2, Hate 0) */
+  var PAST = [
+    "01|Cinematic Timeline|5|dark|serif|timeline|big-number|sparse|cinematic|glass", "02|Mission Control|5|dark|standard|tiles|progress-bars|dense|technical|glass",
+    "03|Gradebook Card|2|light|standard|card|none|medium|calm|flat", "04|Blueprint|5|light|mono|split|chart-curves|medium|technical|grid-lines",
+    "05|Giant Type|5|dark|giant-display|floating-cards|none|sparse|bold|tilted-cards", "06|Calm List|2|light|standard|list|none|sparse|calm|flat",
+    "07|Bento Tiles|5|light|standard|tiles|big-number|medium|playful|flat", "08|Week Planner|5|dark|standard|columns|progress-bars|dense|technical|flat",
+    "09|Focus Room|2|dark|serif|hero-center|none|sparse|calm|flat", "10|Hobby Heatmap|5|dark|serif|grid|heatmap|medium|calm|flat",
+    "11|Day Strip|5|dark|giant-display|timeline|none|sparse|bold|tilted-cards", "12|Load HUD|5|dark|giant-display|tiles|progress-bars|medium|technical|flat",
+    "13|Prism|2|dark|giant-display|floating-cards|none|sparse|bold|tilted-cards", "14|Number Bento|5|dark|giant-display|tiles|big-number|medium|bold|flat",
+    "15|Blueprint Night|5|dark|giant-display|split|chart-curves|medium|technical|grid-lines", "16|Giant Weekdays|5|dark|giant-display|columns|none|medium|bold|tilted-cards",
+    "17|Habit Ledger|5|dark|giant-display|list|heatmap|medium|technical|flat", "18|Exam Countdown|5|dark|giant-display|timeline|big-number|sparse|cinematic|flat",
+    "19|Free Canvas|2|dark|standard|canvas|none|sparse|playful|tilted-cards", "20|Capture Bar|0|dark|giant-display|hero-center|none|sparse|bold|flat"
+  ].map(function (s) { var p = s.split("|"); return { id: p[0], name: p[1], score: +p[2], f: p.slice(3) }; });
+
+  var KEY = "studyboard-proto-3", st = {};
+  try { st = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function get(id) { return st[id] || (st[id] = { s: null, fin: false, tags: {}, note: "" }); }
+
+  /* build the rater under each frame */
+  document.querySelectorAll("figure[data-n]").forEach(function (fig) {
+    var n = fig.getAttribute("data-n"), m = META[n], id = n + " " + m[0];
+    var cap = document.createElement("figcaption");
+    cap.innerHTML = "<h2><span>" + n + "</span>" + m[0] + "</h2><p>" + m[1] + "</p>";
+    fig.appendChild(cap);
+    var r = document.createElement("div"); r.className = "rater";
+    var s = get(id), html = "";
+    html += "<div class='row'><span class='lb'>Score</span>";
+    for (var i = 0; i <= 5; i++) html += "<button type='button' class='sc' data-v='" + i + "' aria-pressed='" + (s.s === i) + "' aria-label='Score " + i + " out of 5'>" + i + "</button>";
+    html += "<span class='scale'>0 hate · 2 meh · 5 love</span></div>";
+    html += "<div class='row'><span class='lb'>Tags</span>";
+    TAGS.forEach(function (t) { var v = s.tags[t] || 0; html += "<button type='button' class='tg' data-t='" + t + "' data-s='" + v + "'>" + (v === 1 ? "+ " : v === -1 ? "− " : "") + t + "</button>"; });
+    html += "<span class='scale'>tap: keep · again: change · again: clear</span></div>";
+    html += "<div class='row'><span class='lb'>Extras</span><button type='button' class='fin' aria-pressed='" + s.fin + "'>★ Finalist</button><input class='note' type='text' id='note-" + n + "' placeholder='What would you change?' value=''></div>";
+    r.innerHTML = html; fig.appendChild(r);
+    r.querySelector(".note").value = s.note || "";
+    r.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return; var cur = get(id);
+      if (b.classList.contains("sc")) { var v = +b.getAttribute("data-v"); cur.s = cur.s === v ? null : v; r.querySelectorAll(".sc").forEach(function (x) { x.setAttribute("aria-pressed", String(cur.s === +x.getAttribute("data-v"))); }); }
+      else if (b.classList.contains("tg")) { var t = b.getAttribute("data-t"), nv = ((cur.tags[t] || 0) + 2) % 3 - 1; /* 0 -> 1 -> -1 -> 0 */ if (nv === 0) delete cur.tags[t]; else cur.tags[t] = nv; b.setAttribute("data-s", String(nv)); b.textContent = (nv === 1 ? "+ " : nv === -1 ? "− " : "") + t; }
+      else if (b.classList.contains("fin")) {
+        if (!cur.fin && Object.keys(st).filter(function (k) { return st[k].fin; }).length >= 3) { b.textContent = "Max 3 finalists"; setTimeout(function () { b.textContent = "★ Finalist"; }, 1400); return; }
+        cur.fin = !cur.fin; b.setAttribute("aria-pressed", String(cur.fin));
+      }
+      save(); refresh();
+    });
+    r.querySelector(".note").addEventListener("input", function (e) { get(id).note = e.target.value; save(); refresh(); });
+  });
+
+  /* taste profile */
+  function entries() {
+    var out = [];
+    if (document.getElementById("past").checked) PAST.forEach(function (p) { out.push({ score: p.score, f: p.f }); });
+    Object.keys(META).forEach(function (n) { var s = st[n + " " + META[n][0]]; if (s && s.s !== null && s.s !== undefined) out.push({ score: s.s, f: META[n][2].split("|") }); });
+    return out;
+  }
+  function profile() {
+    var es = entries(), res = {};
+    KEYS.forEach(function (k, i) { var m = {}; es.forEach(function (e) { var v = e.f[i]; (m[v] = m[v] || { sum: 0, n: 0 }); m[v].sum += e.score; m[v].n++; }); res[k] = Object.keys(m).map(function (v) { return { v: v, avg: m[v].sum / m[v].n, n: m[v].n }; }).sort(function (a, b) { return b.avg - a.avg; }); });
+    return res;
+  }
+  function refresh() {
+    var p = profile(), fx = document.getElementById("facets"), h = "";
+    KEYS.forEach(function (k) { h += "<div class='facet'><h3>" + k + "</h3>"; p[k].forEach(function (r) { h += "<div class='fr'><span>" + r.v + "</span><div class='tr'><i style='width:" + (r.avg / 5 * 100) + "%'></i></div><span class='n'>" + r.avg.toFixed(1) + " · n" + r.n + "</span></div>"; }); h += "</div>"; });
+    fx.innerHTML = h;
+    var lines = ["ROUND 3 SCORES (0 to 5)"], fin = [];
+    Object.keys(META).forEach(function (n) {
+      var id = n + " " + META[n][0], s = st[id]; if (!s) return;
+      var keep = [], chg = []; Object.keys(s.tags).forEach(function (t) { (s.tags[t] === 1 ? keep : chg).push(t); });
+      if (s.s === null && !keep.length && !chg.length && !s.note && !s.fin) return;
+      lines.push(id + ": " + (s.s === null ? "-" : s.s) + (keep.length ? " | keep: " + keep.join(", ") : "") + (chg.length ? " | change: " + chg.join(", ") : "") + (s.note ? " | note: " + s.note : ""));
+      if (s.fin) fin.push(id);
+    });
+    if (lines.length === 1) lines.push("(nothing rated yet)");
+    lines.push("", "FINALISTS: " + (fin.join("; ") || "none"), "", "TASTE PROFILE" + (document.getElementById("past").checked ? " (rounds 1 to 3)" : " (round 3 only)"));
+    KEYS.forEach(function (k) { lines.push(k + ": " + p[k].map(function (r) { return r.v + " " + r.avg.toFixed(1) + " (n" + r.n + ")"; }).join(", ")); });
+    document.getElementById("out").value = lines.join("\n");
+  }
+  document.getElementById("past").addEventListener("change", refresh);
+  document.getElementById("copy").addEventListener("click", function () {
+    var ta = document.getElementById("out"), t = this;
+    function fb() { ta.removeAttribute("readonly"); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.setAttribute("readonly", ""); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).catch(fb); else fb();
+    t.textContent = "Copied"; setTimeout(function () { t.textContent = "Copy results"; }, 1500);
+  });
+  refresh();
+
+  /* 23 month heat (Nov 2026 starts on a Sunday) */
+  var load = { 9: 4, 10: 5, 11: 5, 12: 6, 13: 9, 14: 4, 15: 2, 16: 3, 17: 6, 18: 7, 19: 5, 20: 8, 21: 2, 22: 1, 23: 4, 24: 5, 25: 6, 26: 3, 27: 2, 28: 1, 29: 2, 30: 4, 1: 2, 2: 3, 3: 4, 4: 5, 5: 4, 6: 2, 7: 1, 8: 1 };
+  var cal = document.getElementById("cal"), ch = "";
+  ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].forEach(function (d) { ch += "<b>" + d + "</b>"; });
+  for (var d = 1; d <= 30; d++) {
+    var l = load[d] || 0, a = (l / 9 * .85 + .05).toFixed(2);
+    ch += "<i class='" + (d === 10 ? "today" : "") + (d === 13 ? " hot" : "") + "' style='background:rgba(255,178,62," + a + ");" + (l > 5 ? "color:#111" : "") + "'>" + d + "</i>";
+  }
+  cal.innerHTML = ch;
+
+  /* 24 gantt: day 0 = Nov 9 */
+  var dh = ""; for (var i = 0; i < 14; i++) dh += "<span class='" + (i === 1 ? "t" : "") + "'>" + (9 + i) + "</span>";
+  document.getElementById("days").innerHTML = dh;
+  var rows = [["Algebra quiz", 0, 1.6, 80], ["Chem lab report", 1, 4.4, 15], ["AP Lit essay", 0, 5.3, 40], ["Algebra exam", 1, 5.4, 30], ["Reading ch 7", 1, 9, 20], ["Chem unit test", 4, 11, 0]], gh = "";
+  rows.forEach(function (r) { gh += "<div class='gr'><span class='mono'>" + r[0] + "</span><div class='tr'><div class='bar2' style='left:" + (r[1] / 14 * 100) + "%;width:" + ((r[2] - r[1]) / 14 * 100) + "%'><i style='width:" + r[3] + "%'></i></div><div class='due' style='left:" + (r[2] / 14 * 100) + "%'></div></div></div>"; });
+  document.getElementById("gantt").innerHTML = gh;
+
+  /* 26 radial */
+  var blocks = [["Devotional", 8, 8.5, "#7fe0b5", "8:00"], ["Algebra II", 9.25, 10.25, "#6fb4ff", "9:15"], ["Chem lab", 11, 12.25, "#ffb23e", "11:00"], ["Algebra quiz", 14.17, 14.92, "#ff7a5c", "2:10"], ["Lab outline", 15.5, 16, "#ffb23e", "3:30"], ["Essay draft", 17, 18, "#c79bff", "5:00"], ["Guitar", 19.5, 19.83, "#6fb4ff", "7:30"]];
+  function pt(h, r) { var a = ((h - 8) / 12) * 2 * Math.PI - Math.PI / 2; return [150 + r * Math.cos(a), 150 + r * Math.sin(a)]; }
+  var rs = "<circle cx='150' cy='150' r='112' fill='none' stroke='#1e2330' stroke-width='24'/>", lg = "";
+  blocks.forEach(function (b) { var p1 = pt(b[1], 112), p2 = pt(b[2], 112), large = (b[2] - b[1]) / 12 > .5 ? 1 : 0; rs += "<path d='M" + p1[0].toFixed(1) + " " + p1[1].toFixed(1) + " A112 112 0 " + large + " 1 " + p2[0].toFixed(1) + " " + p2[1].toFixed(1) + "' fill='none' stroke='" + b[3] + "' stroke-width='24'/>"; lg += "<li><i style='background:" + b[3] + "'></i>" + b[0] + "<small>" + b[4] + "</small></li>"; });
+  rs += "<text x='150' y='158' text-anchor='middle' fill='#fff' font-family='Unbounded,sans-serif' font-weight='700' font-size='42' letter-spacing='-2'>2:10</text><text x='150' y='182' text-anchor='middle' fill='#8b92a5' font-family='JetBrains Mono,monospace' font-size='10' letter-spacing='1.5'>NEXT: QUIZ</text><text x='150' y='28' text-anchor='middle' fill='#8b92a5' font-family='JetBrains Mono,monospace' font-size='9'>8 AM</text>";
+  document.getElementById("radial").innerHTML = rs; document.getElementById("rl").innerHTML = lg;
+
+  /* 32 pulse */
+  var vals = [30, 40, 55, 62, 92, 70, 25, 20, 45, 60, 65, 50, 30, 20], pts = vals.map(function (v, i) { return [i / 13 * 1000, 280 - v / 100 * 240]; }), d2 = "M" + pts[0][0] + " " + pts[0][1];
+  for (var j = 0; j < pts.length - 1; j++) { var p0 = pts[j - 1] || pts[j], p1 = pts[j], p2 = pts[j + 1], p3 = pts[j + 2] || p2; d2 += " C " + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ", " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + ", " + p2[0].toFixed(1) + " " + p2[1].toFixed(1); }
+  document.getElementById("pulse").innerHTML = "<defs><linearGradient id='pg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ff9a3d' stop-opacity='.55'/><stop offset='1' stop-color='#ff9a3d' stop-opacity='0'/></linearGradient></defs><path d='" + d2 + " L1000 300 L0 300 Z' fill='url(#pg)'/><path d='" + d2 + "' fill='none' stroke='#ffb23e' stroke-width='3'/><line x1='" + pts[4][0].toFixed(1) + "' y1='" + pts[4][1].toFixed(1) + "' x2='" + pts[4][0].toFixed(1) + "' y2='300' stroke='#ffd9a0' stroke-dasharray='4 6'/><circle cx='" + pts[4][0].toFixed(1) + "' cy='" + pts[4][1].toFixed(1) + "' r='7' fill='#fff'/><text x='" + (pts[4][0] + 14).toFixed(1) + "' y='" + (pts[4][1] - 6).toFixed(1) + "' fill='#ffd9a0' font-family='JetBrains Mono,monospace' font-size='15'>THU 92%</text>";
+
+  /* 37 rings */
+  var ringDefs = [[120, .8, "#ffb23e"], [92, .75, "#6fb4ff"], [64, .9, "#7fe0b5"]], rg = "";
+  ringDefs.forEach(function (r) { var c = 2 * Math.PI * r[0]; rg += "<circle cx='150' cy='150' r='" + r[0] + "' fill='none' stroke='#1b1d23' stroke-width='20'/><circle cx='150' cy='150' r='" + r[0] + "' fill='none' stroke='" + r[2] + "' stroke-width='20' stroke-linecap='round' stroke-dasharray='" + (c * r[1]).toFixed(1) + " " + c.toFixed(1) + "' transform='rotate(-90 150 150)'/>"; });
+  document.getElementById("rings").innerHTML = rg;
+
+  /* 38 hour ruler (8 am to 3 pm, 64px per hour) */
+  var hrs = ["8", "9", "10", "11", "12", "1", "2", "3"], rh = "";
+  hrs.forEach(function (h, i) { rh += "<div class='h' style='top:" + (i * 64) + "px'>" + h + "<small>" + (i < 4 ? "AM" : "PM") + "</small></div>"; });
+  [["Devotional", "on time", 0, .5, "#7fe0b5"], ["Algebra II", "room 204", 1.25, 1, "#9fb8ff"], ["Chem lab", "report due Thu", 3, 1.25, "#ffc24a"], ["Algebra quiz", "next up", 6.17, .75, "#ff9c7a"], ["Lab outline", "30 min", 7.5, .5, "#ffc24a"]].forEach(function (e) { rh += "<div class='e' style='top:" + (e[2] * 64 + 2) + "px;height:" + (e[3] * 64 - 4) + "px;background:" + e[4] + "'>" + e[0] + "<span>" + e[1] + "</span></div>"; });
+  document.getElementById("ruler").innerHTML = rh;
+})();
+</script>
