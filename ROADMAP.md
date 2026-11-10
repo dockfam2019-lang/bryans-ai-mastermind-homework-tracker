@@ -60,3 +60,6 @@ Next.js + TypeScript, SQLite via Drizzle (simple, one file, easy to host), Tailw
 
 ## Verification
 Each phase's "Done when" is tested by running the app locally, plus unit tests for scoring (Phase 2) and the MCP tools (Phase 6), and a manual walkthrough with a partner.
+
+## Research
+See [docs/RESEARCH.md](docs/RESEARCH.md) for the full research behind this plan.
