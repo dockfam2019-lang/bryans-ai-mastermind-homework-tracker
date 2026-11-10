@@ -1,0 +1,400 @@
+<title>Studyboard Prototypes Two</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout concept: one scrolling column of ten more full-width frames (11 to 20), all built from the looks Bryan loved: dark, oversized type, floating cards, HUD tiles, blueprint grid, week planner, heatmap. */
+:root {
+  --bg: #f4f4f2; --fg: #181a1c; --muted: #5c6166; --line: #d9dbdc; --chip: #e7e8e8; --accent: #2b4fd8;
+  --ui: "Manrope", system-ui, sans-serif; --serif: "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace; --wide: "Unbounded", "Manrope", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #131517; --fg: #ecedee; --muted: #9aa0a5; --line: #2b2f33; --chip: #24282b; --accent: #7d9bff; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 56px; }
+header h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1; margin: 0 0 12px; text-wrap: balance; }
+header p { margin: 0; max-width: 62ch; color: var(--muted); line-height: 1.55; }
+figure { margin: 0; display: grid; gap: 14px; }
+figcaption { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: baseline; justify-content: space-between; }
+figcaption h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+figcaption h2 span { font-family: var(--mono); font-weight: 500; color: var(--muted); margin-right: 8px; }
+figcaption p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; max-width: 60ch; line-height: 1.45; }
+.rate { display: flex; gap: 6px; }
+.rate button { font: inherit; font-size: .85rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.rate button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.summary { border-top: 1px solid var(--line); padding-top: 24px; display: grid; gap: 12px; }
+.summary h2 { margin: 0; font-size: 1.05rem; }
+.summary textarea { width: 100%; min-height: 96px; font: .9rem/1.5 var(--mono); background: var(--chip); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; box-sizing: border-box; resize: vertical; }
+.summary button { justify-self: start; font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 999px; border: 0; background: var(--fg); color: var(--bg); cursor: pointer; }
+
+.frame { position: relative; overflow: hidden; border-radius: 18px; min-height: 620px; container-type: inline-size; isolation: isolate; font-family: var(--ui); color: #fff; }
+.mono { font-family: var(--mono); letter-spacing: .04em; }
+.in { position: relative; z-index: 3; padding: 26px clamp(18px, 4cqw, 44px); display: flex; flex-direction: column; min-height: 620px; box-sizing: border-box; }
+.pill { display: inline-block; padding: 12px 26px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24); font-size: .78rem; letter-spacing: .12em; font-weight: 600; text-transform: uppercase; }
+.gt { background: linear-gradient(180deg, #fff 15%, #565656 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- 11 day strip ---------- */
+.p11 { background: #0a0a0b; }
+.p11 .big { position: absolute; left: 0; right: 0; bottom: -.18em; text-align: center; font: 700 clamp(140px, 34cqw, 400px)/.8 var(--wide); z-index: 1; opacity: .9; }
+.p11 .top { display: flex; justify-content: space-between; font-size: .78rem; color: #aaa; }
+.p11 .line { position: absolute; left: 0; right: 0; top: 50%; border-top: 2px dashed rgba(255,255,255,.3); z-index: 2; }
+.p11 .ev { position: absolute; z-index: 3; width: 150px; padding: 12px; border-radius: 14px; font-size: .78rem; box-shadow: 0 12px 30px rgba(0,0,0,.5); }
+.p11 .ev b { display: block; font-size: .95rem; margin-top: 3px; }
+.p11 .ev::after { content: ""; position: absolute; left: 14px; width: 11px; height: 11px; border-radius: 50%; background: #fff; }
+.p11 .up::after { bottom: -26px; } .p11 .dn::after { top: -26px; }
+.p11 .e1 { left: 4%; top: 22%; background: #e8e6e1; color: #111; transform: rotate(-4deg); }
+.p11 .e2 { left: 26%; top: 56%; background: linear-gradient(135deg, #1d2233, #3f5fa0); transform: rotate(3deg); }
+.p11 .e3 { left: 48%; top: 20%; background: linear-gradient(135deg, #2a2a2c, #6d6d72); transform: rotate(-3deg); }
+.p11 .e4 { left: 72%; top: 55%; background: linear-gradient(135deg, #2b1c10, #c9651f); transform: rotate(5deg); }
+@container (max-width: 700px) { .p11 .ev { width: 112px; padding: 9px; } .p11 .e1 { left: 2%; } .p11 .e2 { left: 26%; } .p11 .e3 { left: 50%; } .p11 .e4 { left: 70%; } }
+
+/* ---------- 12 load hud ---------- */
+.p12 { background: #0a0a0a; }
+.p12 .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 26px; flex: 1; align-items: end; }
+.p12 .num { font: 700 clamp(120px, 30cqw, 330px)/.78 var(--wide); letter-spacing: -.05em; margin-left: -.04em; }
+.p12 .num sup { font-size: .32em; vertical-align: top; letter-spacing: 0; }
+.p12 .lab { font-size: .78rem; color: #ffb23e; margin: 18px 0 0; }
+.p12 .stack { display: grid; gap: 10px; }
+.p12 .t { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 12px 14px; font-size: .8rem; color: #bbb; }
+.p12 .t b { display: flex; justify-content: space-between; color: #fff; font-size: .95rem; margin-bottom: 8px; font-weight: 600; }
+.bar { height: 3px; background: rgba(255,255,255,.14); border-radius: 2px; overflow: hidden; } .bar i { display: block; height: 100%; background: #ffb23e; }
+.p12 .top { display: flex; gap: 2px; padding: 4px; background: rgba(255,255,255,.07); border-radius: 12px; align-self: flex-start; font-size: .82rem; margin-bottom: 26px; }
+.p12 .top span { padding: 7px 18px; border-radius: 9px; color: #999; } .p12 .top .on { background: rgba(255,255,255,.14); color: #fff; }
+@container (max-width: 700px) { .p12 .grid { grid-template-columns: 1fr; } }
+
+/* ---------- 13 prism ---------- */
+.p13 { background: radial-gradient(90% 60% at 50% 0%, #17171c 0%, #060607 70%); }
+.p13 .sh { position: absolute; z-index: 2; border-radius: 22px; box-shadow: 0 18px 40px rgba(0,0,0,.6); overflow: hidden; }
+.p13 .sh::before { content: ""; position: absolute; inset: 0; background: conic-gradient(from 30deg, #ff6a3d, #ffd36a, #6affd2, #6aa8ff, #c36aff, #ff6a3d); opacity: .9; }
+.p13 .sh::after { content: ""; position: absolute; inset: 3px; border-radius: 19px; background: linear-gradient(160deg, #1b1b1f 0%, #0a0a0c 70%); opacity: .86; }
+.p13 .sh span { position: absolute; z-index: 1; left: 12px; bottom: 10px; right: 10px; font-size: .75rem; color: #ddd; line-height: 1.25; }
+.p13 .sh b { display: block; color: #fff; font-size: .95rem; }
+.p13 .s1 { width: 190px; height: 130px; top: 9%; left: 6%; transform: rotate(-10deg); }
+.p13 .s2 { width: 108px; height: 150px; top: 6%; left: 40%; transform: rotate(4deg); }
+.p13 .s3 { width: 190px; height: 130px; top: 12%; right: 6%; transform: rotate(9deg); }
+.p13 .s4 { width: 140px; height: 110px; bottom: 12%; left: 9%; transform: rotate(7deg); }
+.p13 .s5 { width: 140px; height: 110px; bottom: 10%; right: 10%; transform: rotate(-7deg); }
+.p13 .in { align-items: center; justify-content: center; text-align: center; }
+.p13 h3 { font: 700 clamp(2.3rem, 8.6cqw, 5.4rem)/.96 var(--wide); letter-spacing: -.04em; margin: 0 0 16px; }
+.p13 p { margin: 0 0 24px; color: #b7b7b7; max-width: 42ch; line-height: 1.5; }
+.p13 .menu { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); z-index: 4; font-size: .85rem; color: #ddd; }
+@container (max-width: 700px) { .p13 .s2, .p13 .s5 { display: none; } .p13 .sh { transform: scale(.75) rotate(-6deg); } }
+
+/* ---------- 14 number bento ---------- */
+.p14 { background: #0b0b0c; }
+.p14 .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 160px; gap: 10px; flex: 1; }
+.p14 .t { border-radius: 20px; padding: 16px; background: #171719; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+.p14 .t small { font: .72rem var(--mono); color: #8d8d92; letter-spacing: .06em; text-transform: uppercase; }
+.p14 .t strong { font: 700 clamp(2.4rem, 8cqw, 4.6rem)/.9 var(--wide); letter-spacing: -.04em; }
+.p14 .w { background: #ecebe7; color: #111; } .p14 .w small { color: #666; }
+.p14 .c { background: linear-gradient(135deg, #f2f2f2 0%, #8c8c92 40%, #e9e9ee 55%, #5a5a60 100%); color: #101010; } .p14 .c small { color: #333; }
+.p14 .s2 { grid-column: span 2; } .p14 .r2 { grid-row: span 2; }
+.p14 .mini { display: flex; gap: 5px; align-items: flex-end; height: 50px; } .p14 .mini i { flex: 1; background: #fff; border-radius: 3px; opacity: .8; }
+@container (max-width: 700px) { .p14 .bento { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- 15 blueprint night ---------- */
+.p15 { background-color: #081a33; background-image: linear-gradient(rgba(120,190,255,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(120,190,255,.13) 1px, transparent 1px); background-size: 48px 48px; color: #cfe6ff; }
+.p15 .note { font: .72rem/1.6 var(--mono); color: #7fb8f0; }
+.p15 .out { font: 700 clamp(3.4rem, 15cqw, 9rem)/.9 var(--wide); color: transparent; -webkit-text-stroke: 1.5px #7fd0ff; letter-spacing: -.04em; margin: 18px 0 6px; }
+.p15 .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 22px; align-items: center; flex: 1; }
+.p15 svg { width: 100%; height: auto; border: 1px solid rgba(127,208,255,.45); background: rgba(8,26,51,.6); }
+.p15 .list { border: 1px solid rgba(127,208,255,.45); font: .8rem var(--mono); }
+.p15 .list div { display: flex; justify-content: space-between; padding: 11px 14px; border-bottom: 1px dashed rgba(127,208,255,.3); } .p15 .list div:last-child { border: 0; }
+.p15 .list em { font-style: normal; color: #ffc24a; }
+.p15 .cm { position: absolute; width: 18px; height: 18px; border: 0 solid #7fd0ff; z-index: 3; }
+.p15 .cm.a { top: 14px; left: 14px; border-top-width: 2px; border-left-width: 2px; } .p15 .cm.b { top: 14px; right: 14px; border-top-width: 2px; border-right-width: 2px; }
+.p15 .cm.c { bottom: 14px; left: 14px; border-bottom-width: 2px; border-left-width: 2px; } .p15 .cm.d { bottom: 14px; right: 14px; border-bottom-width: 2px; border-right-width: 2px; }
+@container (max-width: 700px) { .p15 .grid { grid-template-columns: 1fr; } }
+
+/* ---------- 16 giant weekdays ---------- */
+.p16 { background: #0a0b0f; }
+.p16 .cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; flex: 1; margin-top: 8px; min-width: 0; }
+.p16 .col { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.p16 .d { font: 700 clamp(1.8rem, 6.6cqw, 4.4rem)/.9 var(--wide); letter-spacing: -.05em; margin-bottom: 4px; }
+.p16 .k { border-radius: 14px; padding: 11px; font-size: .75rem; color: #14161c; box-shadow: 0 10px 22px rgba(0,0,0,.4); }
+.p16 .k b { display: block; font-size: .85rem; margin-top: 2px; }
+.p16 .k.a { background: #b9c8ff; transform: rotate(-2deg); } .p16 .k.b { background: #9fe5cb; transform: rotate(2deg); } .p16 .k.c { background: #f5bfd0; transform: rotate(-1.5deg); } .p16 .k.d { background: #f6cf86; transform: rotate(1.5deg); }
+.p16 .hot { outline: 1px solid #f6cf86; outline-offset: 6px; border-radius: 8px; }
+.p16 .flag { font: .68rem var(--mono); color: #f6cf86; }
+.p16 .hd { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: .78rem; color: #8d93a3; }
+@container (max-width: 700px) { .p16 .cols { grid-template-columns: repeat(5, minmax(104px, 1fr)); overflow-x: auto; padding-bottom: 8px; } }
+
+/* ---------- 17 habit ledger ---------- */
+.p17 { background: #0e0e10; }
+.p17 .hd { font: 700 clamp(2.2rem, 8cqw, 5rem)/.9 var(--wide); letter-spacing: -.05em; margin: 4px 0 22px; }
+.p17 .row { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; align-items: center; padding: 14px 0; border-top: 1px solid #25262a; }
+.p17 .row .nm { font: .78rem var(--mono); color: #aaa; }
+.p17 .strip { display: grid; grid-template-columns: repeat(60, 1fr); gap: 2px; min-width: 0; }
+.p17 .strip i { aspect-ratio: 1; border-radius: 2px; background: #1f2023; }
+.p17 .row .st { font: 700 clamp(1.6rem, 4.6cqw, 2.6rem)/1 var(--wide); letter-spacing: -.04em; text-align: right; }
+.p17 .row .st small { display: block; font: .65rem var(--mono); color: #8a8a90; letter-spacing: .06em; margin-top: 4px; }
+.p17 .rule { margin-top: auto; padding-top: 18px; color: #8a8a90; font-size: .85rem; border-top: 1px solid #25262a; }
+@container (max-width: 700px) { .p17 .row { grid-template-columns: 1fr auto; } .p17 .strip { grid-column: 1 / -1; grid-row: 2; } .p17 .strip i:nth-child(-n+30) { display: none; } .p17 .strip { grid-template-columns: repeat(30, 1fr); } }
+
+/* ---------- 18 exam countdown ---------- */
+.p18 { background: radial-gradient(90% 80% at 15% 90%, #2c1b0b 0%, #0d0b09 60%); }
+.p18 .big { position: absolute; left: 3%; bottom: -.14em; font: 700 clamp(220px, 58cqw, 620px)/.8 var(--wide); letter-spacing: -.06em; z-index: 1; background: linear-gradient(180deg, #ffd9a0 10%, #8a4d14 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.p18 .in { align-items: flex-end; }
+.p18 .rt { width: min(430px, 100%); }
+.p18 .tag { display: inline-block; font: .72rem var(--mono); border: 1px solid rgba(255,200,130,.5); color: #ffd08a; border-radius: 999px; padding: 6px 14px; margin-bottom: 14px; }
+.p18 h3 { margin: 0 0 4px; font: 700 clamp(1.4rem, 3.6cqw, 2.1rem)/1.05 var(--wide); letter-spacing: -.03em; }
+.p18 .sub { color: #bba98f; margin: 0 0 20px; font-size: .9rem; }
+.p18 .step { position: relative; margin-left: 8px; padding: 0 0 20px 22px; border-left: 2px dashed rgba(255,200,130,.4); font-size: .9rem; }
+.p18 .step::before { content: ""; position: absolute; left: -7px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #ffd08a; }
+.p18 .step.done::before { background: transparent; border: 2px solid #ffd08a; } .p18 .step.done { color: #8f8068; }
+.p18 .step small { display: block; color: #bba98f; font: .7rem var(--mono); margin-bottom: 2px; }
+@container (max-width: 700px) { .p18 .big { opacity: .35; } }
+
+/* ---------- 19 free canvas ---------- */
+.p19 { background-color: #09090a; background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px); background-size: 26px 26px; touch-action: pan-y; }
+.p19 .cv { position: absolute; inset: 0; z-index: 2; }
+.p19 svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.p19 .nd { position: absolute; width: 168px; padding: 12px; border-radius: 14px; font-size: .78rem; cursor: grab; user-select: none; touch-action: none; box-shadow: 0 12px 28px rgba(0,0,0,.5); color: #111; background: #e9e7e2; }
+.p19 .nd:active { cursor: grabbing; }
+.p19 .nd b { display: block; font-size: .92rem; margin-top: 3px; } .p19 .nd small { font: .66rem var(--mono); color: #555; }
+.p19 .nd.k { background: linear-gradient(135deg, #1c2130, #3d5a9c); color: #fff; } .p19 .nd.k small { color: #b6c4e6; }
+.p19 .nd.o { background: linear-gradient(135deg, #2e1d10, #c4631f); color: #fff; } .p19 .nd.o small { color: #ffd8b8; }
+.p19 .hint { position: absolute; left: 20px; bottom: 16px; z-index: 4; font: .72rem var(--mono); color: #8a8a90; }
+.p19 .title { position: absolute; top: 20px; left: 24px; z-index: 4; font: 700 1.1rem var(--wide); letter-spacing: -.03em; }
+
+/* ---------- 20 capture bar ---------- */
+.p20 { background: radial-gradient(80% 60% at 50% 0%, #1a1a1f 0%, #07080a 70%); }
+.p20 .in { justify-content: center; gap: 22px; }
+.p20 label { font: .72rem var(--mono); color: #8d8d92; letter-spacing: .08em; }
+.p20 input { width: 100%; box-sizing: border-box; background: transparent; border: 0; border-bottom: 2px solid rgba(255,255,255,.3); color: #fff; font: 700 clamp(1.5rem, 5.4cqw, 3.2rem)/1.15 var(--wide); letter-spacing: -.04em; padding: 6px 0 14px; outline-offset: 6px; }
+.p20 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.p20 .chips span { border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 8px 16px; font-size: .85rem; background: rgba(255,255,255,.07); }
+.p20 .chips span small { color: #8d8d92; font: .65rem var(--mono); margin-right: 8px; text-transform: uppercase; }
+.p20 .card { align-self: flex-start; padding: 16px 18px; border-radius: 16px; background: linear-gradient(135deg, #1c2130, #3d5a9c); transform: rotate(-2deg); box-shadow: 0 14px 32px rgba(0,0,0,.55); min-width: 240px; }
+.p20 .card b { display: block; font-size: 1.05rem; margin: 4px 0; } .p20 .card small { font: .7rem var(--mono); color: #b6c4e6; }
+.p20 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Ten more, built from what you loved</h1>
+  <p>Round two stays dark, loud and full of floating cards, and mixes your favorites: giant type with a timeline, giant type with HUD tiles, a night-mode blueprint, a week of giant weekdays and more. Rate 11 to 20 the same way. Number 19 is draggable and 20 parses what you type.</p>
+</header>
+
+<figure>
+  <div class="frame p11"><div class="in"><div class="top mono"><span>STUDYBOARD</span><span>TUE · NOV 10 · 3 DUE</span></div></div>
+    <div class="line"></div>
+    <div class="ev e1 up">8:00<b>Devotional</b>on time</div><div class="ev e2 dn">9:15<b>Algebra II</b>room 204</div><div class="ev e3 up">11:00<b>Chem lab</b>report due Thu</div><div class="ev e4 dn">2:10<b>Algebra quiz</b>next up</div>
+    <div class="big gt" aria-hidden="true">TUE</div></div>
+  <figcaption><div><h2><span>11</span>Day Strip</h2><p>Giant cropped TUE, a dashed line across the middle, and the day's events as tilted cards hanging off it. 01 meets 05.</p></div><div class="rate" data-id="11 Day Strip"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p12"><div class="in">
+    <div class="top"><span class="on">Today</span><span>Week</span><span>School</span><span>Life</span></div>
+    <div class="grid">
+      <div><div class="num gt">74<sup>%</sup></div><p class="lab mono">WEEK LOAD · THURSDAY IS THE CRUNCH</p></div>
+      <div class="stack">
+        <div class="t"><b><span>Algebra II</span><span>6 / 8</span></b><div class="bar"><i style="width:75%"></i></div></div>
+        <div class="t"><b><span>Chem lab report</span><span>15%</span></b><div class="bar"><i style="width:15%"></i></div></div>
+        <div class="t"><b><span>AP Lit essay</span><span>40%</span></b><div class="bar"><i style="width:40%"></i></div></div>
+        <div class="t"><b><span>Guitar this week</span><span>3 / 4</span></b><div class="bar"><i style="width:75%"></i></div></div>
+        <div class="t"><b><span>Devotional on time</span><span>9 / 10</span></b><div class="bar"><i style="width:90%"></i></div></div>
+      </div>
+    </div></div></div>
+  <figcaption><div><h2><span>12</span>Load HUD</h2><p>One enormous number for the week's load, a stack of thin progress tiles beside it, amber instead of teal. 02 meets 05.</p></div><div class="rate" data-id="12 Load HUD"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p13"><div class="menu">/ Menu</div>
+    <div class="sh s1"><span><b>Algebra quiz</b>today 2:10</span></div><div class="sh s2"><span><b>Guitar</b>20 min</span></div><div class="sh s3"><span><b>Chem report</b>due Thu 9:00</span></div><div class="sh s4"><span><b>AP Lit essay</b>40% done</span></div><div class="sh s5"><span><b>Devotional</b>on time</span></div>
+    <div class="in"><h3 class="gt">STUDY<br>IN SESSION</h3><p>Three things due today. Start with the quiz, then let the plan carry the rest.</p><span class="pill">Start a session</span></div></div>
+  <figcaption><div><h2><span>13</span>Prism</h2><p>The Disrupt look pushed further: iridescent-edged floating cards, centered chrome headline, one pill.</p></div><div class="rate" data-id="13 Prism"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p14"><div class="in"><div class="bento">
+    <div class="t w r2 s2"><small>Due today</small><strong style="font-size:clamp(5rem,20cqw,11rem)">3</strong><small>Algebra quiz · lab outline · guitar</small></div>
+    <div class="t"><small>Next up</small><strong>2:10</strong></div>
+    <div class="t c"><small>Devotional on time</small><strong>90%</strong></div>
+    <div class="t"><small>Hours planned</small><strong>14.5</strong><div class="mini"><i style="height:35%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:20%"></i><i style="height:12%"></i></div></div>
+    <div class="t"><small>Guitar streak</small><strong>4</strong><small>days</small></div>
+  </div></div></div>
+  <figcaption><div><h2><span>14</span>Number Bento</h2><p>Black, white and chrome tiles with oversized numerals as the content. 07 meets 05, no color at all.</p></div><div class="rate" data-id="14 Number Bento"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p15"><i class="cm a"></i><i class="cm b"></i><i class="cm c"></i><i class="cm d"></i><div class="in">
+    <div class="note">x: 1558.00 &nbsp; y: 1026.00 &nbsp; [1] Load &nbsp; [2] Blocks &nbsp; [3] Habits</div>
+    <div class="out">WEEK 12</div>
+    <div class="grid">
+      <svg viewBox="0 0 600 300" role="img" aria-label="Daily workload curve with the Thursday peak marked"><path d="M0 230 C 90 190, 140 150, 210 160 S 330 40, 400 50 S 520 200, 600 220" fill="none" stroke="#7fd0ff" stroke-width="3"/><path d="M0 260 C 120 240, 200 230, 300 190 S 480 150, 600 170" fill="none" stroke="#ffc24a" stroke-width="3"/><path d="M0 200 C 100 250, 220 270, 320 230 S 500 110, 600 60" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="6 6"/><line x1="400" y1="50" x2="400" y2="290" stroke="#7fd0ff" stroke-dasharray="4 6"/><text x="408" y="40" fill="#ffc24a" font-family="monospace" font-size="13">THU 92%</text></svg>
+      <div class="list"><div><span>1 · Due today</span><em>3</em></div><div><span>2 · Study blocks</span><em>4</em></div><div><span>3 · Habits</span><em>2 / 3</em></div><div><span>4 · Hours planned</span><em>14.5</em></div></div>
+    </div>
+  </div></div></div>
+  <figcaption><div><h2><span>15</span>Blueprint Night</h2><p>04 after dark: navy grid, outlined giant WEEK 12, crop marks in the corners, mono data list.</p></div><div class="rate" data-id="15 Blueprint Night"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p16"><div class="in">
+    <div class="hd mono"><span>WEEK OF NOV 10</span><span>14.5 H PLANNED</span></div>
+    <div class="cols">
+      <div class="col"><div class="d gt">MON</div><div class="k a">4:00 pm<b>Algebra review</b></div><div class="k d">7:00 pm<b>Guitar</b></div></div>
+      <div class="col"><div class="d gt">TUE</div><div class="k a">2:10 pm<b>Algebra quiz</b></div><div class="k b">5:00 pm<b>Lab outline</b></div></div>
+      <div class="col"><div class="d gt">WED</div><div class="k b">4:00 pm<b>Lab report</b></div><div class="k c">6:00 pm<b>Essay draft</b></div></div>
+      <div class="col hot"><div class="d gt">THU</div><div class="flag">CRUNCH · 92%</div><div class="k c">8:30 am<b>Essay revise</b></div><div class="k a">5:00 pm<b>Algebra set</b></div><div class="k b">7:00 pm<b>Lab data</b></div></div>
+      <div class="col"><div class="d gt">FRI</div><div class="k c">8:00 am<b>Essay due</b></div><div class="k d">6:00 pm<b>Guitar</b></div></div>
+    </div></div></div>
+  <figcaption><div><h2><span>16</span>Giant Weekdays</h2><p>Five oversized day names, each with its blocks as tilted cards. The crunch day gets an outline. 08 meets 05.</p></div><div class="rate" data-id="16 Giant Weekdays"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p17"><div class="in">
+    <div class="hd gt">60 DAYS</div>
+    <div id="ledger"></div>
+    <div class="rule">One missed day is data. Two in a row ends a streak. Every good day stays on the strip.</div>
+  </div></div>
+  <figcaption><div><h2><span>17</span>Habit Ledger</h2><p>One heat strip per hobby with a giant streak number at the end. 10 meets 05, with four hobbies instead of one.</p></div><div class="rate" data-id="17 Habit Ledger"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p18"><div class="big" aria-hidden="true">3</div><div class="in">
+    <div class="rt"><span class="tag">PREP PLAN BUILT BACKWARD FROM THE EXAM</span>
+      <h3>DAYS TO THE ALGEBRA II UNIT 5 EXAM</h3><p class="sub">Friday, Nov 13 at 9:00 am</p>
+      <div class="step done"><small>MON NOV 9 · DONE</small>Practice test, 60 min</div>
+      <div class="step"><small>TUE NOV 10 · TODAY</small>Flashcards and flagged problems, 30 min</div>
+      <div class="step"><small>WED NOV 11</small>Review sheet, 45 min</div>
+      <div class="step"><small>THU NOV 12</small>Light review and sleep early, 15 min</div>
+    </div></div></div>
+  <figcaption><div><h2><span>18</span>Exam Countdown</h2><p>A new screen: a giant cropped number of days left and an automatic prep plan running backward from the exam. Warm amber, no red alarm.</p></div><div class="rate" data-id="18 Exam Countdown"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p19" id="canvas"><div class="title gt">NOV 10 · FREE CANVAS</div><svg id="links"></svg><div class="cv" id="cv">
+    <div class="nd k" data-id="quiz" style="left:6%;top:18%"><small>TODAY 2:10</small><b>Algebra quiz</b></div>
+    <div class="nd" data-id="rev" style="left:30%;top:50%"><small>30 MIN</small><b>Review flagged problems</b></div>
+    <div class="nd o" data-id="lab" style="left:60%;top:16%"><small>DUE THU 9:00</small><b>Chem lab report</b></div>
+    <div class="nd" data-id="out" style="left:52%;top:52%"><small>30 MIN</small><b>Outline</b></div>
+    <div class="nd" data-id="data" style="left:76%;top:62%"><small>25 MIN</small><b>Write up lab data</b></div>
+    <div class="nd" data-id="essay" style="left:12%;top:72%"><small>DUE FRI 8:00</small><b>AP Lit essay draft</b></div>
+  </div><div class="hint">Drag the cards. Lines show what has to happen before what.</div></div>
+  <figcaption><div><h2><span>19</span>Free Canvas</h2><p>The free-flowing version: tasks as cards you drag around, with lines for dependencies. This one really moves.</p></div><div class="rate" data-id="19 Free Canvas"></div></figcaption>
+</figure>
+
+<figure>
+  <div class="frame p20"><div class="in">
+    <label for="cap">QUICK CAPTURE</label>
+    <input id="cap" type="text" value="math ch5 problems due fri 9am ~45m" autocomplete="off" spellcheck="false">
+    <div class="row"><div class="chips" id="chips"></div></div>
+    <div class="card" id="card"></div>
+  </div></div>
+  <figcaption><div><h2><span>20</span>Capture Bar</h2><p>Type a sentence in giant letters and it splits into course, due date and time estimate as you type. Try "chem lab report due thu 9am ~90m".</p></div><div class="rate" data-id="20 Capture Bar"></div></figcaption>
+</figure>
+
+<section class="summary">
+  <h2>Your picks</h2>
+  <textarea id="out" readonly aria-label="Your picks">Rate the prototypes above to build your list.</textarea>
+  <button id="copy" type="button">Copy picks</button>
+</section>
+</div>
+
+<script>
+(function () {
+  var KEY = "studyboard-proto-ratings-2", ratings = {};
+  try { ratings = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(ratings)); } catch (e) {} }
+  function summary() {
+    var g = { Love: [], Meh: [], Hate: [] }, any = false;
+    Object.keys(ratings).forEach(function (k) { if (g[ratings[k]]) { g[ratings[k]].push(k); any = true; } });
+    if (!any) return "Rate the prototypes above to build your list.";
+    return ["Love", "Meh", "Hate"].map(function (x) { return x + ": " + (g[x].join("; ") || "none"); }).join("\n");
+  }
+  function refresh() { document.getElementById("out").value = summary(); }
+  document.querySelectorAll(".rate").forEach(function (box) {
+    var id = box.getAttribute("data-id");
+    ["Love", "Meh", "Hate"].forEach(function (label) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = label;
+      b.setAttribute("aria-pressed", ratings[id] === label ? "true" : "false");
+      b.addEventListener("click", function () {
+        if (ratings[id] === label) delete ratings[id]; else ratings[id] = label;
+        box.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", ratings[id] === x.textContent ? "true" : "false"); });
+        save(); refresh();
+      });
+      box.appendChild(b);
+    });
+  });
+  refresh();
+  document.getElementById("copy").addEventListener("click", function () {
+    var ta = document.getElementById("out"), t = this;
+    function fb() { ta.removeAttribute("readonly"); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.setAttribute("readonly", ""); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).catch(fb); else fb();
+    t.textContent = "Copied"; setTimeout(function () { t.textContent = "Copy picks"; }, 1500);
+  });
+
+  /* 17 habit ledger */
+  var seed = 11; function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  var habits = [["GUITAR", "#f0b24b", .72, 14], ["RUNNING", "#6fb4ff", .5, 9], ["READING", "#7fe0b5", .85, 21], ["DRAWING", "#ff8fa8", .38, 5]];
+  var led = document.getElementById("ledger");
+  habits.forEach(function (h) {
+    var row = document.createElement("div"); row.className = "row";
+    var s = ""; for (var i = 0; i < 60; i++) { var on = rnd() < h[2]; s += "<i style='" + (on ? "background:" + h[1] + ";opacity:" + (0.45 + rnd() * 0.55).toFixed(2) : "") + "'></i>"; }
+    row.innerHTML = "<div class='nm'>" + h[0] + "</div><div class='strip'>" + s + "</div><div class='st' style='color:" + h[1] + "'>" + h[3] + "<small>DAY STREAK</small></div>";
+    led.appendChild(row);
+  });
+
+  /* 19 free canvas */
+  var cv = document.getElementById("cv"), svg = document.getElementById("links"), frame = document.getElementById("canvas");
+  var pairs = [["rev", "quiz"], ["out", "lab"], ["data", "lab"], ["out", "data"], ["essay", "essay"]];
+  var nodes = {}; cv.querySelectorAll(".nd").forEach(function (n) { nodes[n.getAttribute("data-id")] = n; });
+  function draw() {
+    var html = "";
+    pairs.forEach(function (p) {
+      if (p[0] === p[1]) return;
+      var a = nodes[p[0]], b = nodes[p[1]];
+      var x1 = a.offsetLeft + a.offsetWidth / 2, y1 = a.offsetTop + a.offsetHeight / 2, x2 = b.offsetLeft + b.offsetWidth / 2, y2 = b.offsetTop + b.offsetHeight / 2;
+      var mx = (x1 + x2) / 2;
+      html += "<path d='M" + x1 + " " + y1 + " C " + mx + " " + y1 + ", " + mx + " " + y2 + ", " + x2 + " " + y2 + "' fill='none' stroke='rgba(255,255,255,.38)' stroke-width='1.5' stroke-dasharray='5 6'/>";
+    });
+    svg.innerHTML = html;
+  }
+  Object.keys(nodes).forEach(function (k) {
+    var n = nodes[k], dx = 0, dy = 0, drag = false;
+    n.addEventListener("pointerdown", function (e) {
+      drag = true; n.setPointerCapture(e.pointerId);
+      n.style.left = n.offsetLeft + "px"; n.style.top = n.offsetTop + "px";
+      dx = e.clientX - n.offsetLeft; dy = e.clientY - n.offsetTop; n.style.zIndex = 5;
+    });
+    n.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var x = Math.max(0, Math.min(cv.clientWidth - n.offsetWidth, e.clientX - dx));
+      var y = Math.max(0, Math.min(cv.clientHeight - n.offsetHeight, e.clientY - dy));
+      n.style.left = x + "px"; n.style.top = y + "px"; draw();
+    });
+    n.addEventListener("pointerup", function () { drag = false; n.style.zIndex = ""; });
+    n.addEventListener("pointercancel", function () { drag = false; });
+  });
+  function place() { Object.keys(nodes).forEach(function (k) { var n = nodes[k]; if (n.style.left.indexOf("%") > -1) { n.style.left = (parseFloat(n.style.left) / 100 * cv.clientWidth) + "px"; n.style.top = (parseFloat(n.style.top) / 100 * cv.clientHeight) + "px"; } }); draw(); }
+  place(); window.addEventListener("resize", draw);
+
+  /* 20 capture bar parser */
+  var input = document.getElementById("cap"), chips = document.getElementById("chips"), card = document.getElementById("card");
+  var courses = [[/^(math|algebra|alg)\b/i, "Algebra II"], [/^(chem|chemistry|lab)\b/i, "Chemistry"], [/^(lit|essay|english)\b/i, "AP Lit"]];
+  var dayNames = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"], full = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function parse() {
+    var t = input.value.trim(), course = "Unsorted", title = t, est = "", due = "";
+    var m = t.match(/~\s*(\d+)\s*(m|min|h|hr)?/i);
+    if (m) { est = m[2] && /^h/i.test(m[2]) ? (m[1] * 60) + " min" : m[1] + " min"; title = title.replace(m[0], ""); }
+    var d = t.match(/due\s+(today|tomorrow|tmrw|sun|mon|tue|wed|thu|fri|sat)[a-z]*(?:\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm))?/i);
+    if (d) {
+      var w = d[1].toLowerCase().slice(0, 3), base = new Date(2026, 10, 10), delta = 0;
+      if (w === "tom" || w === "tmr") delta = 1; else if (w !== "tod") { delta = (dayNames.indexOf(w) - base.getDay() + 7) % 7 || 7; }
+      var dt = new Date(2026, 10, 10 + delta);
+      due = full[dt.getDay()] + ", " + mon[dt.getMonth()] + " " + dt.getDate();
+      if (d[2]) due += " at " + d[2] + ":" + (d[3] || "00") + " " + d[4].toLowerCase();
+      title = title.replace(d[0], "");
+    }
+    courses.forEach(function (c) { if (course === "Unsorted" && c[0].test(title.trim())) { course = c[1]; title = title.trim().replace(c[0], ""); } });
+    title = title.replace(/\s+/g, " ").trim() || "Untitled";
+    chips.innerHTML = "<span><small>Course</small>" + esc(course) + "</span><span><small>Due</small>" + esc(due || "no date") + "</span><span><small>Estimate</small>" + esc(est || "none") + "</span>";
+    card.innerHTML = "<small>" + esc(course.toUpperCase()) + "</small><b>" + esc(title) + "</b><small>" + esc(due || "no date") + (est ? " · ~" + esc(est) : "") + "</small>";
+  }
+  input.addEventListener("input", parse); parse();
+})();
+</script>
