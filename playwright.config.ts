@@ -8,7 +8,8 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    // E2E_BASE_URL=https://... runs the same tests against a deployed copy instead of a local build
+    baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
     serviceWorkers: 'block',
     // PW_CHANNEL=chrome uses the installed Google Chrome instead of the downloaded Chromium
@@ -18,7 +19,7 @@ export default defineConfig({
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
+  webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run build && npx vite preview --port 4173 --host 127.0.0.1 --strictPort',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,

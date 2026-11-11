@@ -14,7 +14,7 @@ export const test = base.extend<{ errors: string[] }>({
 })
 
 export async function openApp(page: Page, hash = '#/today') {
-  await page.goto(`/${hash}`)
+  await page.goto(`./${hash}`) // relative, so it also works when the app lives under a sub-path
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
 }
 

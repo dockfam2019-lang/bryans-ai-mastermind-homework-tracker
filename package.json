@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "gen-icons": "node scripts/gen-icons.mjs",
     "e2e": "playwright test",
-    "screenshots": "SCREENSHOTS=1 playwright test e2e/screenshots.spec.ts"
+    "screenshots": "SCREENSHOTS=1 playwright test e2e/screenshots.spec.ts",
+    "deploy": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

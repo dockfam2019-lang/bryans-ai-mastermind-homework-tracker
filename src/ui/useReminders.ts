@@ -19,7 +19,7 @@ function deliver(r: Reminder) {
   // System notification when the user has allowed it; otherwise an in-app toast
   // (Safari and many mobile browsers do not deliver background notifications reliably).
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    try { new Notification(r.title, { body: r.body, icon: '/icon-192.png' }); return } catch { /* fall through */ }
+    try { new Notification(r.title, { body: r.body, icon: `${import.meta.env.BASE_URL}icon-192.png` }); return } catch { /* fall through */ }
   }
   showToast(`${r.title}: ${r.body}`, { ms: 9000 })
 }
