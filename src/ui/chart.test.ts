@@ -18,4 +18,16 @@ describe('chart helpers', () => {
     expect(d.endsWith('100.0 20.0')).toBe(true)
     expect(smoothPath([])).toBe('')
   })
+
+  it('never overshoots: control points stay within the neighbouring values', () => {
+    const pts: [number, number][] = [[0, 100], [10, 0], [20, 100], [30, 100], [40, 0]]
+    const ys = [...smoothPath(pts).matchAll(/C ([\d.]+) ([\d.-]+), ([\d.]+) ([\d.-]+)/g)].flatMap((m) => [Number(m[2]), Number(m[4])])
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(0)
+    expect(Math.max(...ys)).toBeLessThanOrEqual(100)
+  })
+
+  it('draws a flat run as a flat line', () => {
+    expect(smoothPath([[0, 50], [10, 50], [20, 50]])).toBe('M0.0 50.0 C 3.3 50.0, 6.7 50.0, 10.0 50.0 C 13.3 50.0, 16.7 50.0, 20.0 50.0')
+  })
 })
+

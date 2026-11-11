@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { repo } from '../../data'
 import { formatTime, relativeDay } from '../../domain/dates'
-import { parseQuickAdd } from '../../domain/quickAdd'
+import { parseQuickAdd, quickAddWarnings } from '../../domain/quickAdd'
 import type { Assignment, Course } from '../../domain/types'
 import { showToast } from '../../ui/toast'
 import type { AssignmentDraft } from './AssignmentForm'
@@ -11,6 +11,7 @@ export function QuickAdd({ courses, today, onNeedsForm }: { courses: Course[]; t
   const [text, setText] = useState('')
   const parsed = text.trim() ? parseQuickAdd(text, today, courses) : null
   const course = parsed?.courseId ? courses.find((c) => c.id === parsed.courseId) : undefined
+  const warnings = parsed ? quickAddWarnings(text, parsed, courses) : []
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -51,6 +52,7 @@ export function QuickAdd({ courses, today, onNeedsForm }: { courses: Course[]; t
           <span className="chip"><small>Type</small>{parsed.type}</span>
         </div>
       )}
+      {warnings.length > 0 && <ul className="qa-warn" aria-live="polite">{warnings.map((w) => <li key={w}>{w}</li>)}</ul>}
     </form>
   )
 }

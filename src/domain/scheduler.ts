@@ -6,6 +6,7 @@
 // cannot fit before its due date is reported as a shortfall so the week can be called overloaded.
 import { addDays, dueAt, weekday } from './dates'
 import { loadByDay, remainingMinutes } from './load'
+import { itemStatus } from './status'
 import type { Assignment, LocalDate, StudyBlock } from './types'
 
 export const DEFAULT_STUDY_MINUTES = 120
@@ -18,6 +19,8 @@ export type NewBlock = Omit<StudyBlock, 'id' | 'createdAt' | 'updatedAt'>
 export interface PlanResult {
   blocks: NewBlock[]
   shortfalls: { assignmentId: string; minutes: number }[]
+  /** Past-due items. They are never scheduled (a block after the due date is useless); they are flagged to catch up on. */
+  overdue: string[]
   /** Days where the estimated work is more than the time set aside. */
   overloaded: { date: LocalDate; needed: number; capacity: number }[]
 }
@@ -27,8 +30,10 @@ export function capacityFor(date: LocalDate, perDay = DEFAULT_STUDY_MINUTES): nu
   return w === 0 || w === 6 ? Math.round((perDay * WEEKEND_FACTOR) / 5) * 5 : perDay
 }
 
-export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBlock[]; today: LocalDate; horizonDays?: number; perDay?: number }): PlanResult {
+export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBlock[]; today: LocalDate; now?: Date; horizonDays?: number; perDay?: number }): PlanResult {
   const { today, perDay = DEFAULT_STUDY_MINUTES } = args
+  const [ty, tm, td] = today.split('-').map(Number)
+  const now = args.now ?? new Date(ty, tm - 1, td) // start of today when no clock is given
   const horizon = args.horizonDays ?? 14
   const lastDay = addDays(today, horizon - 1)
   const counted = args.existing.filter((b) => b.state === 'accepted' || b.state === 'done')
@@ -48,11 +53,15 @@ export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBl
 
   const blocks: NewBlock[] = []
   const shortfalls: PlanResult['shortfalls'] = []
+  const overdue: string[] = []
 
   for (const a of open) {
     let remaining = remainingMinutes(a) - (covered.get(a.id) ?? 0)
     if (remaining <= 0) continue
-    const due = a.dueDate < today ? today : a.dueDate
+    if (itemStatus(a, now) === 'overdue') { overdue.push(a.id); continue }
+    // study by the day before anything due before mid-afternoon; otherwise up to the due date
+    let due = a.dueTime && a.dueTime <= '15:00' ? addDays(a.dueDate, -1) : a.dueDate
+    if (due < today) due = today // due later today: today is the only chance
     const end = due < lastDay ? due : lastDay
     for (let d = today; d <= end && remaining > 0; d = addDays(d, 1)) {
       if (dismissed.has(`${a.id}:${d}`) || alreadyPlanned.has(`${a.id}:${d}`)) continue
@@ -60,8 +69,8 @@ export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBl
       let minutes = Math.min(remaining, MAX_BLOCK, Math.max(avail, 0))
       // no scraps: a block is at least 15 minutes (or the whole rest, if less is left)
       if (minutes < Math.min(remaining, MIN_BLOCK)) continue
-      // a leftover under 15 minutes is folded into this block instead of becoming its own
-      if (remaining - minutes > 0 && remaining - minutes < MIN_BLOCK && avail >= remaining) minutes = remaining
+      // a leftover under 15 minutes is folded into this block (even a little past the day's time) instead of becoming its own
+      if (remaining - minutes > 0 && remaining - minutes < MIN_BLOCK && avail + MIN_BLOCK >= remaining) minutes = remaining
       blocks.push({ assignmentId: a.id, date: d, minutes, state: 'suggested', examPrep: a.type === 'exam' || undefined })
       used.set(d, (used.get(d) ?? 0) + minutes)
       remaining -= minutes
@@ -73,7 +82,7 @@ export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBl
     .map((d) => ({ date: d.date, needed: d.minutes, capacity: capacityFor(d.date, perDay) }))
     .filter((d) => d.needed > d.capacity)
 
-  return { blocks, shortfalls, overloaded }
+  return { blocks, shortfalls, overdue, overloaded }
 }
 
 /** Minutes already planned (accepted, done or suggested) for a day. */

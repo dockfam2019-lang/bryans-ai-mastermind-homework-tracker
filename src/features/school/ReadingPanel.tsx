@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { repo } from '../../data'
-import { relativeDay } from '../../domain/dates'
+import { addDays, relativeDay } from '../../domain/dates'
 import { readingPace } from '../../domain/reading'
 import type { Course, ReadingItem } from '../../domain/types'
 import { Modal } from '../../ui/Modal'
@@ -37,7 +37,7 @@ export function ReadingPanel({ items, courses, today }: { items: ReadingItem[]; 
                   <span className="bar" style={{ marginTop: 6, display: 'block' }}><i style={{ width: `${(i.pagesRead / i.totalPages) * 100}%` }} /></span>
                   <span className="sub">{pace.status === 'done' ? 'Finished.' : pace.status === 'past-due' ? `${pace.remaining} pages left. Pick a new deadline when you are ready.` : `About ${pace.perDay} ${pace.perDay === 1 ? 'page' : 'pages'} a day (${pace.daysLeft} ${pace.daysLeft === 1 ? 'day' : 'days'} left).`}</span>
                 </span>
-                <button className="btn ghost" type="button" onClick={() => logPages(i, pace.perDay || 10)}>+{pace.perDay || 10} pages</button>
+                {pace.status !== 'done' && <LogPages key={i.pagesRead} suggested={Math.min(pace.remaining, Math.max(1, pace.perDay))} label={i.title} onLog={(n) => logPages(i, n)} />}
                 <button className="btn ghost" type="button" onClick={() => remove(i)}>Remove</button>
               </li>
             )
@@ -53,7 +53,7 @@ function Form({ courses, today, onClose }: { courses: Course[]; today: string; o
   const [title, setTitle] = useState('')
   const [total, setTotal] = useState('')
   const [read, setRead] = useState('0')
-  const [deadline, setDeadline] = useState(today)
+  const [deadline, setDeadline] = useState(addDays(today, 7))
   const [courseId, setCourseId] = useState('')
   const [error, setError] = useState('')
 
@@ -74,6 +74,18 @@ function Form({ courses, today, onClose }: { courses: Course[]; today: string; o
       <label className="field">Course (optional)<select value={courseId} onChange={(e) => setCourseId(e.target.value)}><option value="">None</option>{courses.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
       {error && <p className="error full" role="alert">{error}</p>}
       <div className="actions full"><button className="btn" type="submit">Save</button><button className="btn ghost" type="button" onClick={onClose}>Cancel</button></div>
+    </form>
+  )
+}
+
+/** Log how many pages you read; prefilled with today's target. */
+function LogPages({ suggested, label, onLog }: { suggested: number; label: string; onLog: (pages: number) => void }) {
+  const [n, setN] = useState(String(suggested))
+  return (
+    <form className="logpages" onSubmit={(e) => { e.preventDefault(); const v = Number(n); if (v > 0) onLog(v) }}>
+      <label className="sr-only" htmlFor={`pages-${label}`}>Pages read for {label}</label>
+      <input id={`pages-${label}`} type="number" min="1" inputMode="numeric" value={n} onChange={(e) => setN(e.target.value)} />
+      <button className="btn ghost" type="submit">Log pages</button>
     </form>
   )
 }

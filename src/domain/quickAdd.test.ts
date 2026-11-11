@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseQuickAdd } from './quickAdd'
+import { parseQuickAdd, quickAddWarnings } from './quickAdd'
 import type { Course } from './types'
 
 const course = (id: string, name: string): Course => ({ id, name, color: '#fff', createdAt: 0, updatedAt: 0, schedule: { kind: 'weekly', meetings: [] } })
@@ -52,3 +52,16 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('due fri', today, courses).title).toBe('Due fri')
   })
 })
+
+describe('quickAddWarnings', () => {
+  const warn = (t: string) => quickAddWarnings(t, parseQuickAdd(t, today, courses), courses)
+  it('says nothing when everything was understood', () => {
+    expect(warn('math ch5 problems due fri 9am ~45m')).toEqual([])
+  })
+  it('explains an unreadable date, estimate or course', () => {
+    expect(warn('math worksheet due whenever')[0]).toContain('date after “due”')
+    expect(warn('math worksheet ~a while')[0]).toContain('time after “~”')
+    expect(warn('worksheet due fri')[0]).toContain('No course matched')
+  })
+})
+

@@ -14,6 +14,8 @@ import type { Assignment, Course } from '../../domain/types'
 import { openAssignments } from '../../domain/upcoming'
 import { useLive, useNow } from '../../ui/hooks'
 import { PlanPanel } from '../plan/PlanPanel'
+import { usePlan } from '../plan/usePlan'
+import { OverdueBanner } from '../today/OverdueBanner'
 import { WeekTimeline } from './WeekTimeline'
 
 const TABS = [{ id: '', label: 'Week' }, { id: 'month', label: 'Month' }, { id: 'plan', label: 'Plan' }]
@@ -25,6 +27,7 @@ export function WeekPage({ tab }: { tab: string }) {
   const courses = useLive(() => repo.courses.all())
   const settings = useLive(() => repo.settings.get('main'))
   const blocks = useLive(() => repo.studyBlocks.all())
+  const live = usePlan()
   const [anchor, setAnchor] = useState(today) // any date inside the week or month being shown
   const [selected, setSelected] = useState<string | null>(null)
   const swipe = useRef<{ x: number; t: number } | null>(null)
@@ -43,7 +46,7 @@ export function WeekPage({ tab }: { tab: string }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  if (!assignments || !courses || !settings || !blocks) return null
+  if (!assignments || !courses || !settings || !blocks || !live) return null
   const weekStart = settings.weekStart
   const open = openAssignments(assignments)
   const courseOf = (a: Assignment): Course | undefined => courses.find((c) => c.id === a.courseId)
@@ -118,8 +121,13 @@ export function WeekPage({ tab }: { tab: string }) {
             )
           })}
         </div>
-      ) : (
-        <WeekTimeline days={weeks[0]} today={today} now={now} courses={courses} assignments={assignments} blocks={blocks} settings={settings} loadOf={loadOf} maxLoad={maxLoad} />
+      ) : null}
+      {!plan && month && <div className="legend month" aria-hidden="true"><span>lighter</span><i className="l1" /><i className="l2" /><i className="l3" /><i className="l4" /><span>heavier workload</span></div>}
+      {!plan && !month && (
+        <>
+          <OverdueBanner items={live.overdue} now={now} />
+          <WeekTimeline days={weeks[0]} today={today} now={now} courses={courses} assignments={assignments} blocks={blocks} suggestions={live.suggestions} settings={settings} loadOf={loadOf} maxLoad={maxLoad} />
+        </>
       )}
 
       </div>

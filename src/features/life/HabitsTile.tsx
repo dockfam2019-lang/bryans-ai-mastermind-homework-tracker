@@ -15,7 +15,7 @@ export function HabitsTile({ hobbies, logs, pauses, today, weekStart }: { hobbie
           return (
             <li key={h.id}>
               <i className="dot big" style={{ background: h.color }} />
-              <span className="title"><b><a href={`#/life/${h.id}`}>{h.name}</a></b><span className="sub">{p.value} of {p.target} {p.unit} this week · {streak.current} {streak.unit}{streak.current === 1 ? '' : 's'} streak</span></span>
+              <span className="title"><b><a href={`#/life/${h.id}`}>{h.name}</a></b><span className="sub">{p.value} of {p.target} {p.unit} this week (since {weekStart === 1 ? 'Mon' : 'Sun'}) · {streak.current} {streak.unit}{streak.current === 1 ? '' : 's'} streak</span></span>
               <button className="btn" type="button" onClick={() => checkIn(h)}>{done ? 'Log another' : 'Check in'}</button>
             </li>
           )

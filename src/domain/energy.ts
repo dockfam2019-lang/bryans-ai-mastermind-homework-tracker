@@ -35,7 +35,10 @@ export function assignStartTimes(args: {
   windows: EnergyWindow[]
   busy: (date: LocalDate) => Interval[]
   difficultyOf?: (a: Assignment) => number
+  /** Minutes kept free after each placed block (a short break). */
+  gapMinutes?: number
 }): StudyBlock[] {
+  const gap = args.gapMinutes ?? 0
   const { blocks, assignments, windows } = args
   const diff = (b: StudyBlock) => {
     const a = assignments.find((x) => x.id === b.assignmentId)
@@ -47,19 +50,20 @@ export function assignStartTimes(args: {
   const placed = new Map<string, StudyBlock>()
   for (const [date, dayBlocks] of byDate) {
     const busy = [...args.busy(date)]
-    for (const b of dayBlocks) if (b.start) busy.push({ start: toMin(b.start), end: toMin(b.start) + b.minutes })
+    for (const b of dayBlocks) if (b.start) busy.push({ start: toMin(b.start), end: toMin(b.start) + b.minutes + gap })
     for (const b of [...dayBlocks].filter((x) => !x.start).sort((x, y) => diff(y) - diff(x))) {
       const order = diff(b) >= 4 ? HARD : EASY
       let start: number | undefined
       for (const rating of order) {
         for (const w of windows.filter((x) => x.rating === rating).sort((x, y) => x.startHour - y.startHour)) {
-          start = firstGap({ start: w.startHour * 60, end: w.endHour * 60 }, busy, b.minutes)
+          // room for the block plus its break, so the next block never starts right on top of it
+          start = firstGap({ start: w.startHour * 60, end: w.endHour * 60 + gap }, busy, b.minutes + gap)
           if (start !== undefined) break
         }
         if (start !== undefined) break
       }
       if (start !== undefined) {
-        busy.push({ start, end: start + b.minutes })
+        busy.push({ start, end: start + b.minutes + gap })
         placed.set(b.id, { ...b, start: toTime(start) })
       }
     }

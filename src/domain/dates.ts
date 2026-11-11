@@ -76,3 +76,28 @@ export function formatCountdown(ms: number): string {
   if (hours < 24) return `${hours}h ${mins % 60}m`
   return `${Math.floor(hours / 24)}d`
 }
+
+/** "in 45 minutes", "in 3 hours", "tomorrow", "in 2 days", or "overdue". */
+export function countdownWords(ms: number): string {
+  if (ms < 0) return 'overdue'
+  const mins = Math.round(ms / 60000)
+  if (mins < 60) return `in ${mins} ${mins === 1 ? 'minute' : 'minutes'}`
+  const hours = Math.round(mins / 60)
+  if (hours < 24) return `in ${hours} ${hours === 1 ? 'hour' : 'hours'}`
+  const days = Math.round(hours / 24)
+  return days === 1 ? 'in 1 day' : `in ${days} days`
+}
+
+/** One duration format everywhere: "45m", "2h", "8h 48m". */
+export function formatHM(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes))
+  const h = Math.floor(m / 60)
+  if (h === 0) return `${m}m`
+  return m % 60 === 0 ? `${h}h` : `${h}h ${m % 60}m`
+}
+
+/** Minutes since midnight for "HH:mm". */
+export function minutesOfDay(t: TimeOfDay): number {
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}

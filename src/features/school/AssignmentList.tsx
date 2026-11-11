@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { repo } from '../../data'
-import { dueAt, formatTime, relativeDay, diffDays } from '../../domain/dates'
+import { formatTime, relativeDay, diffDays } from '../../domain/dates'
 import type { Assignment, Course } from '../../domain/types'
+import { itemStatus } from '../../domain/status'
 import { openAssignments } from '../../domain/upcoming'
 
 interface Group { key: string; label: string; items: Assignment[] }
@@ -20,8 +21,8 @@ export function AssignmentList({ assignments, courses, now, today, onEdit }: { a
     const match = (a: Assignment) => (!courseId || a.courseId === courseId) && (!q || a.title.toLowerCase().includes(q) || (a.notes ?? '').toLowerCase().includes(q) || a.tags.some((t) => t.toLowerCase().includes(q)))
     const open = openAssignments(assignments).filter(match)
     const g: Group[] = [
-      { key: 'overdue', label: 'Waiting for you', items: open.filter((a) => dueAt(a.dueDate, a.dueTime) < now) },
-      { key: 'today', label: 'Today', items: open.filter((a) => dueAt(a.dueDate, a.dueTime) >= now && a.dueDate === today) },
+      { key: 'overdue', label: 'Overdue', items: open.filter((a) => itemStatus(a, now) === 'overdue') },
+      { key: 'today', label: 'Due today', items: open.filter((a) => itemStatus(a, now) === 'dueToday') },
       { key: 'week', label: 'Next 7 days', items: open.filter((a) => { const n = diffDays(today, a.dueDate); return n >= 1 && n <= 7 }) },
       { key: 'later', label: 'Later', items: open.filter((a) => diffDays(today, a.dueDate) > 7) },
     ]
@@ -51,7 +52,7 @@ export function AssignmentList({ assignments, courses, now, today, onEdit }: { a
       )}
       {groups.map((g) => (
         <section key={g.key} className="group" aria-label={g.label}>
-          <h2 className="mono">{`${g.label} · ${g.items.length}`}</h2>
+          <h2 className={g.key === 'overdue' ? 'tag-overdue' : 'mono'}>{`${g.label} · ${g.items.length}`}</h2>
           <ul className="list">
             {g.items.map((a) => (
               <li key={a.id} className={a.status === 'done' ? 'is-done' : ''}>
@@ -60,7 +61,7 @@ export function AssignmentList({ assignments, courses, now, today, onEdit }: { a
                   <b>{a.title}</b>
                   <span className="sub"><i className="dot" style={{ background: courseOf(a)?.color ?? 'var(--muted)' }} />{courseOf(a)?.name ?? 'No course'} · {a.type}{a.subtasks.length ? ` · ${a.subtasks.filter((s) => s.done).length}/${a.subtasks.length} steps` : ''}</span>
                 </button>
-                <span className="sub right">{relativeDay(a.dueDate, today)}{a.dueTime ? ` ${formatTime(a.dueTime)}` : ''}{a.estimatedMinutes ? ` · ${a.estimatedMinutes}m` : ''}</span>
+                <span className="sub right">{a.status !== 'done' && itemStatus(a, now) === 'overdue' && <span className="tag-overdue">Overdue · </span>}{relativeDay(a.dueDate, today)}{a.dueTime ? ` ${formatTime(a.dueTime)}` : ''}{a.estimatedMinutes ? ` · ${a.estimatedMinutes}m` : ''}</span>
               </li>
             ))}
           </ul>

@@ -1,16 +1,25 @@
-// Smooth curve through points (Catmull-Rom converted to cubic Bezier segments).
+// Monotone cubic curve (Fritsch-Carlson). Unlike a plain spline it never overshoots between points,
+// so a day with no work never dips below zero and a peak is drawn where the data peaks.
 export type Pt = [number, number]
 
 export function smoothPath(pts: Pt[]): string {
   if (pts.length === 0) return ''
   const f = (n: number) => n.toFixed(1)
+  if (pts.length === 1) return `M${f(pts[0][0])} ${f(pts[0][1])}`
+  const n = pts.length
+  const dx: number[] = [], slope: number[] = []
+  for (let i = 0; i < n - 1; i++) {
+    dx.push(pts[i + 1][0] - pts[i][0])
+    slope.push((pts[i + 1][1] - pts[i][1]) / dx[i])
+  }
+  // tangents: zero at turning points, harmonic mean elsewhere (keeps the curve monotone)
+  const m: number[] = [slope[0]]
+  for (let i = 1; i < n - 1; i++) m.push(slope[i - 1] * slope[i] <= 0 ? 0 : (2 * slope[i - 1] * slope[i]) / (slope[i - 1] + slope[i]))
+  m.push(slope[n - 2])
   let d = `M${f(pts[0][0])} ${f(pts[0][1])}`
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] ?? pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] ?? p2
-    d += ` C ${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)}, ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)}, ${f(p2[0])} ${f(p2[1])}`
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i] / 3
+    d += ` C ${f(pts[i][0] + h)} ${f(pts[i][1] + m[i] * h)}, ${f(pts[i + 1][0] - h)} ${f(pts[i + 1][1] - m[i + 1] * h)}, ${f(pts[i + 1][0])} ${f(pts[i + 1][1])}`
   }
   return d
 }

@@ -58,11 +58,25 @@ export function hobbyStats(args: { hobby: Hobby; logs: Log[]; pauses: Pause[]; t
   return { sessions: mine.length, totalMinutes, weeklyAvgMinutes, bestWeek, consistency, timeOfDay }
 }
 
+export interface SessionCounts {
+  /** Today and the 6 days before it. */
+  last7: number
+  /** The 7 days before that. */
+  prev7: number
+  /** The calendar week containing today (starting Sunday or Monday). */
+  thisWeek: number
+}
+
+/** The single source for hobby session counts, so every screen agrees. */
+export function sessionCounts(logs: Log[], hobbyId: string, today: LocalDate, weekStart: 0 | 1 = 0): SessionCounts {
+  const mine = logs.filter((l) => l.hobbyId === hobbyId && l.localDate <= today)
+  const count = (from: LocalDate, to: LocalDate) => mine.filter((l) => l.localDate >= from && l.localDate <= to).length
+  return { last7: count(addDays(today, -6), today), prev7: count(addDays(today, -13), addDays(today, -7)), thisWeek: count(startOfWeek(today, weekStart), today) }
+}
+
 /** One calm sentence comparing the last 7 days with the 7 days before. Never scolds. */
 export function weeklyReview(name: string, logs: Log[], hobbyId: string, today: LocalDate): string {
-  const count = (from: LocalDate, to: LocalDate) => logs.filter((l) => l.hobbyId === hobbyId && l.localDate >= from && l.localDate <= to).length
-  const now = count(addDays(today, -6), today)
-  const before = count(addDays(today, -13), addDays(today, -7))
+  const { last7: now, prev7: before } = sessionCounts(logs, hobbyId, today)
   const times = (n: number) => `${n} ${n === 1 ? 'session' : 'sessions'}`
   if (now === 0 && before === 0) return `${name}: no sessions in the last two weeks. Whenever you are ready, one short one is enough.`
   if (now === 0) return `${name}: no sessions in the last 7 days. The 7 days before, you did ${times(before)}. One short session restarts the rhythm.`

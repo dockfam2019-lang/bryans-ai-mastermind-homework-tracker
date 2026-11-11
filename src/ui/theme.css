@@ -400,3 +400,42 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .pager .btn { padding: 8px 14px; background: transparent; }
 .pager .btn:hover { background: var(--fill-strong); }
 @media (max-width: 640px) { .tabs .grow { display: none; } .pager { margin-left: auto; } }
+
+.logpages { display: flex; gap: 6px; align-items: center; } .logpages input { width: 76px; padding: 8px 10px; }
+
+/* ---------- overdue state and ghost blocks ---------- */
+.tag-overdue { font: 600 0.68rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--warm); }
+.overdue { border-radius: 20px; padding: 12px 16px; margin-bottom: 14px; background: color-mix(in srgb, var(--warm) 12%, transparent); box-shadow: inset 3px 0 0 var(--warm); display: grid; gap: 6px; }
+.overdue ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.overdue li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.chip.due.late, .tflag.late { box-shadow: inset 3px 0 0 var(--warm); }
+.tflag.late span { color: var(--warm); }
+.tblock.ghost { font: inherit; text-align: left; cursor: pointer; color: var(--text); background: transparent; border: 1px dashed color-mix(in srgb, var(--text) 40%, transparent); box-shadow: none; }
+.tblock.ghost:hover { background: color-mix(in srgb, var(--accent-3) 14%, var(--bg)); border-style: solid; }
+.tblock.done { opacity: 0.75; } .tblock.done b { text-decoration: line-through; }
+/* due flags sit on the right so they never hide a class name */
+.tflag { left: 38%; right: 4px; }
+
+.class-past .title b { color: var(--muted); } .class-past .dot { opacity: 0.4; }
+.class-now { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 14px; padding-inline: 8px; }
+.tag-now { font: 600 0.68rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-3); }
+.list li.is-suggested .title b { font-weight: 500; }
+
+/* legends that match their charts */
+.legend { display: flex; gap: 6px; align-items: center; margin-top: 10px; font: 0.68rem var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.legend .l1 { background: color-mix(in srgb, var(--accent) 30%, transparent); } .legend .l2 { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+.legend .l3 { background: color-mix(in srgb, var(--accent) 80%, transparent); } .legend .l4 { background: var(--accent); }
+.legend.month .l1 { background: color-mix(in srgb, var(--accent) 12%, var(--bg)); } .legend.month .l2 { background: color-mix(in srgb, var(--accent) 24%, var(--bg)); }
+.legend.month .l3 { background: color-mix(in srgb, var(--accent) 35%, var(--bg)); } .legend.month .l4 { background: color-mix(in srgb, var(--accent) 45%, var(--bg)); }
+.barval { font: 0.6rem var(--font-mono); color: var(--muted); min-height: 1em; }
+.stackbar { grid-template-rows: auto 1fr auto; }
+.qa-warn { color: var(--text); font-size: 0.85rem; display: grid; gap: 4px; margin: 0; padding-left: 18px; }
+.qa-warn li::marker { color: var(--accent); }
+
+.tblock.ghost { font-size: 0.78rem; line-height: 1.2; }
+.tblock b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tblock.short { padding: 3px 8px; align-content: center; } .tblock.short span { display: none; }
+
+.planblock .title { display: grid; }
+.tblock.short { padding: 1px 8px; font-size: 0.72rem; }

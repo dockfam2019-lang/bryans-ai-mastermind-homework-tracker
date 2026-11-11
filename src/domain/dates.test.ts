@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, diffDays, dueAt, formatCountdown, formatTime, relativeDay, startOfWeek, toLocalDate, weekDates, weekday } from './dates'
+import { addDays, countdownWords, diffDays, dueAt, formatCountdown, formatHM, formatTime, relativeDay, startOfWeek, toLocalDate, weekDates, weekday } from './dates'
 
 describe('local dates', () => {
   it('formats a Date as a local calendar day, including late-evening edges', () => {
@@ -59,4 +59,17 @@ describe('local dates', () => {
     expect(formatCountdown((2 * 60 + 10) * 60000)).toBe('2h 10m')
     expect(formatCountdown(3 * 86400000)).toBe('3d')
   })
+
+  it('says countdowns in words with a unit', () => {
+    expect(countdownWords(-5)).toBe('overdue')
+    expect(countdownWords(45 * 60000)).toBe('in 45 minutes')
+    expect(countdownWords(3 * 3600000)).toBe('in 3 hours')
+    expect(countdownWords(30 * 3600000)).toBe('in 1 day')
+    expect(countdownWords(69 * 3600000)).toBe('in 3 days')
+  })
+
+  it('formats durations the same way everywhere', () => {
+    expect([0, 45, 60, 528, 90].map(formatHM)).toEqual(['0m', '45m', '1h', '8h 48m', '1h 30m'])
+  })
 })
+

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { repo } from '../../data'
 import { balanceByDay, balanceNudge } from '../../domain/balance'
-import { addDays, DAY_SHORT, startOfWeek, toLocalDate } from '../../domain/dates'
+import { addDays, DAY_SHORT, formatHM, startOfWeek, toLocalDate } from '../../domain/dates'
+import { itemStatus } from '../../domain/status'
 import { rankByHardness } from '../../domain/difficulty'
 import { learnWindows } from '../../domain/energy'
 import { weeklyReview } from '../../domain/hobbies'
@@ -17,7 +18,7 @@ import { downloadBlob, renderRecapPng } from './recapImage'
 import { useInsightsData, type InsightsData } from './useInsightsData'
 
 const MOODS: [1 | 2 | 3 | 4 | 5, string][] = [[1, 'Rough'], [2, 'Low'], [3, 'Okay'], [4, 'Good'], [5, 'Great']]
-const hm = (m: number) => `${Math.floor(m / 60)}h ${m % 60}m`
+const hm = formatHM
 
 export function InsightsPage({ tab }: { tab: string }) {
   const d = useInsightsData()
@@ -62,7 +63,8 @@ function Overview({ d }: { d: InsightsData }) {
     <div className="bento">
       <section className="tile span-12" aria-label="Weekly review">
         <h2>Weekly review</h2>
-        <p>{withTone('review', d.settings.aiTone, `This week you finished ${doneThisWeek} ${doneThisWeek === 1 ? 'assignment' : 'assignments'} and focused for ${hm(focusThisWeek)}.`)}</p>
+        <p>{withTone('review', d.settings.aiTone, `This week you finished ${doneThisWeek} ${doneThisWeek === 1 ? 'assignment' : 'assignments'}${focusThisWeek > 0 ? ` and focused for ${hm(focusThisWeek)}` : ''}.`)}</p>
+        {focusThisWeek === 0 && <p className="sub">No focus sessions yet this week. Press “Start for 5 minutes” on Today to begin one.</p>}
         {d.hobbies.map((h) => <p key={h.id} className="sub">{weeklyReview(h.name, d.logs, h.id, d.today)}</p>)}
       </section>
 
@@ -80,14 +82,16 @@ function Overview({ d }: { d: InsightsData }) {
             return <i key={x.date} className={`l${level}`} style={x.date < d.today ? { opacity: 0.3 } : undefined} title={`${x.date}: ${x.minutes} min of ${capacityFor(x.date, perDay)}`} />
           })}
         </div>
-        <p className="sub">Darker means a heavier day compared with the time you set aside. Dark days are the ones to start early for.</p>
+        <div className="legend" aria-hidden="true"><span>lighter</span><i className="l1" /><i className="l2" /><i className="l3" /><i className="l4" /><span>heavier</span></div>
+        <p className="sub">Brighter gold means more work compared with the time you set aside. Bright days are the ones to start early for.</p>
       </section>
 
       <section className="tile span-6" aria-label="School and hobby balance">
         <h2>Balance, last 7 days</h2>
         <div className="stackbars" role="img" aria-label="School and hobby minutes for each of the last 7 days">
           {days.map((x) => (
-            <div key={x.date} className="stackbar" title={`${x.date}: school ${x.schoolMin} min, hobbies ${x.hobbyMin} min`}>
+            <div key={x.date} className="stackbar" title={`${x.date}: school ${hm(x.schoolMin)}, hobbies ${hm(x.hobbyMin)}`}>
+              <span className="barval">{x.schoolMin + x.hobbyMin > 0 ? hm(x.schoolMin + x.hobbyMin) : ''}</span>
               <div className="stack">
                 <i className="h" style={{ height: `${(x.hobbyMin / maxDay) * 100}%` }} />
                 <i className="s" style={{ height: `${(x.schoolMin / maxDay) * 100}%` }} />
@@ -182,7 +186,8 @@ function EnergySection({ d }: { d: InsightsData }) {
 function HardestSection({ d }: { d: InsightsData }) {
   const open = d.assignments.filter((a) => a.status !== 'done')
   const history = d.assignments.filter((a) => a.status === 'done')
-  const ranked = rankByHardness(open, history).slice(0, 5)
+  // past-due items are left out: this list is for planning what comes next
+  const ranked = rankByHardness(open.filter((a) => itemStatus(a, d.now) !== 'overdue'), history).slice(0, 5)
   return (
     <section className="tile span-6" aria-label="Likely hardest assignments">
       <h2>Likely hardest next</h2>

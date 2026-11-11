@@ -57,13 +57,14 @@ test('start for 5 minutes opens the focus timer', async ({ page }) => {
   await expect(dock).toHaveCount(0)
 })
 
-test('the planner suggests study blocks that can be accepted', async ({ page }) => {
+test('the plan shows suggestions that can be accepted, and Week shows the same ones', async ({ page }) => {
   await openApp(page, '#/week/plan')
-  await page.getByRole('button', { name: 'Suggest my plan' }).click()
-  const accept = page.getByRole('button', { name: 'Accept' }).first()
+  const accept = page.getByRole('button', { name: /^Accept / }).first()
   await expect(accept).toBeVisible()
   await accept.click()
-  await expect(page.getByRole('button', { name: 'Start', exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Start / }).first()).toBeVisible()
+  await openApp(page, '#/week')
+  await expect(page.locator('.ghost').first()).toBeVisible()
 })
 
 test('flashcards: make a deck, add cards and study one', async ({ page }) => {

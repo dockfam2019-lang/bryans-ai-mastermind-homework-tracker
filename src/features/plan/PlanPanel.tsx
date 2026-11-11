@@ -1,120 +1,107 @@
 import { useState } from 'react'
 import { repo } from '../../data'
-import { addDays, DAY_SHORT, fromLocalDate, MONTH_SHORT, relativeDay, toLocalDate } from '../../domain/dates'
-import { capacityFor, DEFAULT_STUDY_MINUTES, plannedMinutes, suggestPlan, type PlanResult } from '../../domain/scheduler'
-import type { Assignment, Course, StudyBlock } from '../../domain/types'
-import { assignStartTimes, minutesOf } from '../../domain/energy'
-import { predictDifficulty } from '../../domain/difficulty'
-import { classesOn } from '../../domain/schedule'
+import { addDays, DAY_SHORT, formatHM, formatTime, fromLocalDate, MONTH_SHORT, relativeDay, toLocalDate } from '../../domain/dates'
+import type { Suggestion } from '../../domain/livePlan'
+import { capacityFor, DEFAULT_STUDY_MINUTES } from '../../domain/scheduler'
+import type { StudyBlock } from '../../domain/types'
 import { showToast } from '../../ui/toast'
-import { useLive, useNow } from '../../ui/hooks'
 import { startFocus } from '../focus/focusStore'
-import { acceptBlock, dismissBlock, generatePlan, markBlockDone, moveBlock, removeBlock } from './planActions'
+import { OverdueBanner } from '../today/OverdueBanner'
+import { markBlockDone, removeBlock } from './planActions'
+import { acceptSuggestion, dismissSuggestion, usePlan } from './usePlan'
 
-const hm = (m: number) => `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`.replace(/^0h /, '')
-
+/** The full plan: the same suggestions Week shows (dashed) plus what you have accepted. */
 export function PlanPanel() {
-  const now = useNow()
-  const today = toLocalDate(now)
-  const assignments = useLive(() => repo.assignments.all())
-  const courses = useLive(() => repo.courses.all())
-  const blocks = useLive(() => repo.studyBlocks.all())
-  const settings = useLive(() => repo.settings.get('main'))
-  const windows = useLive(() => repo.energyWindows.all())
-  const classes = useLive(() => repo.courses.all())
+  const p = usePlan()
   const [moving, setMoving] = useState<string | null>(null)
-  const [result, setResult] = useState<PlanResult | null>(null)
-  const [busy, setBusy] = useState(false)
-
-  if (!assignments || !courses || !blocks || !settings || !windows || !classes) return null
+  if (!p) return null
+  const { now, assignments, blocks, settings, suggestions, overdue, shortfalls, overloaded } = p
+  const today = toLocalDate(now)
   const perDay = settings.studyMinutesPerDay ?? DEFAULT_STUDY_MINUTES
-  const byId = new Map<string, Assignment>(assignments.map((a) => [a.id, a]))
-  const courseOf = (a?: Assignment): Course | undefined => courses.find((c) => c.id === a?.courseId)
-
-  // warnings are always live, even before "Suggest" is pressed
-  const live = suggestPlan({ assignments, existing: blocks.filter((b) => b.state !== 'suggested' || b.label).map((b) => (b.state === 'suggested' ? { ...b, state: 'accepted' as const } : b)), today, perDay })
-  const overloaded = (result ?? live).overloaded
-  const shortfalls = (result ?? live).shortfalls
-
+  const titleOf = (id: string, label?: string) => label ?? assignments.find((a) => a.id === id)?.title ?? 'Study'
+  const colorOf = (id: string) => p.courses.find((c) => c.id === assignments.find((a) => a.id === id)?.courseId)?.color ?? 'var(--muted)'
   const days = Array.from({ length: 14 }, (_, i) => addDays(today, i))
-  const shown = blocks.filter((b) => b.state !== 'dismissed')
-  const hasSuggestions = shown.some((b) => b.state === 'suggested')
+  const saved = blocks.filter((b) => (b.state === 'accepted' || b.state === 'done') && b.date >= today)
 
-  async function placeInBestTimes() {
-    if (windows!.length === 0) { showToast('Set your energy windows first (Insights, When you focus best).'); return }
-    const history = assignments!.filter((a) => a.status === 'done')
-    const open = blocks!.filter((b) => b.state !== 'dismissed' && b.state !== 'done' && !b.start)
-    const placed = assignStartTimes({
-      blocks: open, assignments: assignments!, windows: windows!,
-      busy: (date) => classesOn(classes!, date, settings!.rotationStart).map(({ meeting }) => ({ start: minutesOf(meeting.start), end: minutesOf(meeting.end) })),
-      difficultyOf: (a) => predictDifficulty(a, history).score,
-    })
-    const changed = placed.filter((b, i) => b.start && b.start !== open[i].start)
-    for (const b of changed) await repo.studyBlocks.put(b)
-    showToast(changed.length ? `Placed ${changed.length} ${changed.length === 1 ? 'block' : 'blocks'}: hard work in your best hours.` : 'No block fit in your windows. Try wider windows or fewer blocks that day.')
+  async function acceptAll() {
+    for (const s of suggestions) await acceptSuggestion(s, titleOf(s.assignmentId, s.label), s.date, true)
+    showToast(`Planned ${suggestions.length} study ${suggestions.length === 1 ? 'block' : 'blocks'}.`)
   }
 
-  async function suggest() {
-    setBusy(true)
-    setResult(await generatePlan(assignments!, today, perDay))
-    setBusy(false)
+  const Row = ({ block, suggestion }: { block?: StudyBlock; suggestion?: Suggestion }) => {
+    const id = block?.id ?? suggestion!.key
+    const assignmentId = block?.assignmentId ?? suggestion!.assignmentId
+    const title = titleOf(assignmentId, block?.label ?? suggestion?.label)
+    const start = block?.start ?? suggestion?.start
+    const minutes = block?.minutes ?? suggestion!.minutes
+    return (
+      <div className={`planblock ${block ? block.state : 'suggested'}`}>
+        <i className="dot big" style={{ background: colorOf(assignmentId) }} />
+        <span className="title"><b>{title}</b><span className="sub">{start ? `${formatTime(start)} · ` : ''}{minutes} min{suggestion ? ' · suggested' : ''}{(block?.examPrep ?? suggestion?.examPrep) ? ' · exam prep' : ''}</span></span>
+        {suggestion && <button className="btn" type="button" onClick={() => acceptSuggestion(suggestion, title)}>Accept<span className="sr-only"> {title}</span></button>}
+        {block?.state === 'accepted' && <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: assignmentId, title })}>Start<span className="sr-only"> {title}</span></button>}
+        {block?.state === 'accepted' && <button className="btn ghost" type="button" onClick={() => markBlockDone(block)}>Done<span className="sr-only"> {title}</span></button>}
+        {block?.state !== 'done' && <button className="btn ghost" type="button" onClick={() => setMoving(moving === id ? null : id)}>Move<span className="sr-only"> {title}</span></button>}
+        {suggestion ? <button className="btn ghost" type="button" onClick={() => dismissSuggestion(suggestion, title)}>Skip<span className="sr-only"> {title}</span></button>
+          : <button className="btn ghost" type="button" onClick={() => removeBlock(block!)}>Remove<span className="sr-only"> {title}</span></button>}
+        {moving === id && (
+          <input type="date" aria-label={`Move ${title} to`} min={today} defaultValue={block?.date ?? suggestion!.date} style={{ width: 'auto' }}
+            onChange={(e) => {
+              const d = e.target.value
+              if (!d) return
+              if (block) void repo.studyBlocks.put({ ...block, date: d, start: undefined })
+              else void acceptSuggestion(suggestion!, title, d)
+              setMoving(null)
+            }} />
+        )}
+      </div>
+    )
   }
 
   return (
     <div>
+      <OverdueBanner items={overdue} now={now} />
       <div className="inline" style={{ marginBottom: 16 }}>
-        <button className="btn" type="button" disabled={busy} onClick={suggest}>Suggest my plan</button>
-        <button className="btn ghost" type="button" onClick={placeInBestTimes}>Place blocks in my best times</button>
+        <button className="btn" type="button" disabled={suggestions.length === 0} onClick={acceptAll}>{suggestions.length ? `Accept all ${suggestions.length} suggestions` : 'Nothing to suggest'}</button>
         <label>Time set aside per day (minutes)
           <input type="number" min="30" step="15" value={perDay} onChange={(e) => void repo.settings.put({ ...settings, studyMinutesPerDay: Math.max(30, Number(e.target.value) || DEFAULT_STUDY_MINUTES) })} />
         </label>
       </div>
+      <p className="sub" style={{ marginBottom: 16 }}>Dashed rows are suggestions: the same ones shown on Week and Today. They fit each assignment before its due date, in free time after your classes. Set your best hours in Insights to change where they land.</p>
 
       {overloaded.length > 0 && (
         <div className="warn" role="status" style={{ marginBottom: 16 }}>
-          <b>Heads up.</b> {overloaded.slice(0, 3).map((d) => `${relativeDay(d.date, today)} looks heavy (about ${hm(d.needed)} of work, ${hm(d.capacity)} set aside)`).join('; ')}. Consider starting earlier, moving something, or setting aside more time.
+          <b>Heads up.</b> {overloaded.slice(0, 3).map((d) => `${relativeDay(d.date, today)} looks heavy (about ${formatHM(d.needed)} of work, ${formatHM(d.capacity)} set aside)`).join('; ')}. Consider starting earlier or setting aside more time.
         </div>
       )}
       {shortfalls.length > 0 && (
         <div className="warn" role="status" style={{ marginBottom: 16 }}>
-          {shortfalls.slice(0, 3).map((s) => `${byId.get(s.assignmentId)?.title ?? 'An item'} is short by ${hm(s.minutes)} before its due date`).join('; ')}.
+          {shortfalls.slice(0, 3).map((s) => `${titleOf(s.assignmentId)} needs ${formatHM(s.minutes)} more than fits before it is due`).join('; ')}.
         </div>
       )}
-      {!hasSuggestions && shown.length === 0 && (
-        <div className="empty"><p>No study blocks yet.</p><p className="sub">Press “Suggest my plan”. The planner fits each assignment’s estimated time before its due date, earliest due first. You can accept, move or dismiss every block.</p></div>
+      {saved.length === 0 && suggestions.length === 0 && (
+        <div className="empty"><p>Nothing to plan.</p><p className="sub">Add assignments with an estimate and suggestions appear here, on Week and on Today.</p></div>
       )}
 
-      {shown.some((b) => plannedMinutes(blocks, b.date) > 90) && <p className="sub" style={{ marginBottom: 12 }}>Tip: on days with more than 90 minutes planned, take a 10 minute break about every 50 minutes.</p>}
       {days.map((d) => {
-        const dayBlocks = shown.filter((b) => b.date === d).sort((a, b) => (a.state === 'suggested' ? 1 : 0) - (b.state === 'suggested' ? 1 : 0))
-        if (dayBlocks.length === 0) return null
-        const total = plannedMinutes(blocks, d)
+        const dayBlocks = saved.filter((b) => b.date === d)
+        const daySuggestions = suggestions.filter((s) => s.date === d)
+        if (dayBlocks.length + daySuggestions.length === 0) return null
+        const planned = dayBlocks.reduce((sum, b) => sum + b.minutes, 0)
+        const proposed = daySuggestions.reduce((sum, s) => sum + s.minutes, 0)
         const cap = capacityFor(d, perDay)
         const fd = fromLocalDate(d)
+        const byTime = (x?: string) => x ?? '99:99'
+        const rows = [...dayBlocks.map((b) => ({ t: byTime(b.start), b })), ...daySuggestions.map((s) => ({ t: byTime(s.start), s }))].sort((a, b) => a.t.localeCompare(b.t))
         return (
           <section key={d} className="planday" aria-label={d}>
             <header>
               <b>{relativeDay(d, today)} <span className="sub">{DAY_SHORT[fd.getDay()]} {MONTH_SHORT[fd.getMonth()]} {fd.getDate()}</span></b>
-              <span className="sub">{hm(total)} of {hm(cap)}</span>
-              <div className={`capbar${total > cap ? ' over' : ''}`}><i style={{ width: `${Math.min(100, (total / cap) * 100)}%` }} /></div>
+              <span className="sub">{formatHM(planned)} planned{proposed ? ` + ${formatHM(proposed)} suggested` : ''} of {formatHM(cap)}</span>
+              <div className={`capbar${planned + proposed > cap ? ' over' : ''}`}><i style={{ width: `${Math.min(100, ((planned + proposed) / cap) * 100)}%` }} /></div>
             </header>
-            {dayBlocks.map((b: StudyBlock) => {
-              const a = byId.get(b.assignmentId)
-              return (
-                <div key={b.id} className={`planblock ${b.state}`}>
-                  <i className="dot big" style={{ background: courseOf(a)?.color ?? 'var(--muted)' }} />
-                  <span className="title"><b>{b.label ?? a?.title ?? 'Study'}</b><span className="sub">{b.label ? `${a?.title ?? ''} · ` : ''}{b.start ? `${b.start} · ` : ''}{b.minutes} min{b.state === 'suggested' ? ' · suggested' : ''}{b.examPrep ? ' · exam prep' : ''}</span></span>
-                  {b.state === 'suggested' && <button className="btn" type="button" onClick={() => acceptBlock(b)}>Accept</button>}
-                  {b.state === 'accepted' && a && <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: a.id, title: a.title })}>Start</button>}
-                  {b.state === 'accepted' && <button className="btn ghost" type="button" onClick={() => markBlockDone(b)}>Done</button>}
-                  {b.state !== 'done' && <button className="btn ghost" type="button" onClick={() => setMoving(moving === b.id ? null : b.id)}>Move</button>}
-                  {b.state === 'suggested' ? <button className="btn ghost" type="button" onClick={() => dismissBlock(b)}>Dismiss</button> : <button className="btn ghost" type="button" onClick={() => removeBlock(b)}>Remove</button>}
-                  {moving === b.id && (
-                    <input type="date" aria-label="Move to date" min={today} defaultValue={b.date} onChange={(e) => { if (e.target.value) { void moveBlock(b, e.target.value); setMoving(null) } }} style={{ width: 'auto' }} />
-                  )}
-                </div>
-              )
-            })}
+            {rows.map((r) => ('b' in r ? <Row key={r.b!.id} block={r.b} /> : <Row key={r.s!.key} suggestion={r.s} />))}
+            {planned + proposed > 90 && <p className="sub">Tip: take a 10 minute break about every 50 minutes.</p>}
           </section>
         )
       })}

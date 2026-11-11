@@ -110,3 +110,12 @@ function matchesCourse(word: string, course: Course): boolean {
   if (name.split(/\s+/).some((p) => p.length >= 3 && p.startsWith(word))) return true
   return (ALIASES[word] ?? []).some((a) => name.includes(a))
 }
+
+/** Plain-language notes about parts of the sentence that could not be read, shown under the quick-add box. */
+export function quickAddWarnings(input: string, r: QuickAddResult, courses: Course[]): string[] {
+  const out: string[] = []
+  if (/\b(due|by)\b/i.test(input) && !r.dueDate) out.push('Could not read the date after “due”. Try “due fri”, “due tomorrow 9am” or “due 11/18”.')
+  if (/~/.test(input) && !r.estimatedMinutes) out.push('Could not read the time after “~”. Try “~45m” or “~1.5h”.')
+  if (courses.length > 0 && !r.courseId) out.push('No course matched, so you will pick one. Start with a course name or nickname, like “math” or “chem”.')
+  return out
+}

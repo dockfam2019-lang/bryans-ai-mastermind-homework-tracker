@@ -1,6 +1,9 @@
 // Sample data so the app has something to show on first run. Dates are relative to `today`
 // so the demo never looks stale. Users can clear it from Settings.
 import { addDays, weekday } from '../domain/dates'
+
+/** Moves a weekend date to the following Monday, so sample work is due on school days. */
+const schoolDay = (d: LocalDate): LocalDate => (weekday(d) === 6 ? addDays(d, 2) : weekday(d) === 0 ? addDays(d, 1) : d)
 import type { Assignment, Attendance, Hobby, Log, LocalDate, Settings } from '../domain/types'
 import type { Repository } from './repository'
 
@@ -29,11 +32,11 @@ export async function seedSample(repo: Repository, today: LocalDate): Promise<vo
   const base = { subtasks: [], tags: [], attachmentIds: [], status: 'todo' as const }
   const items: Omit<Assignment, 'id' | 'createdAt' | 'updatedAt'>[] = [
     { ...base, courseId: algebra.id, title: 'Unit 5 quiz', type: 'quiz', dueDate: today, dueTime: '14:10', priority: 3, estimatedMinutes: 45, difficulty: 4, progress: 0.8 },
-    { ...base, courseId: chem.id, title: 'Lab report', type: 'project', dueDate: addDays(today, 3), dueTime: '09:00', priority: 3, estimatedMinutes: 90, difficulty: 3, progress: 0.15 },
-    { ...base, courseId: lit.id, title: 'Essay draft 2', type: 'homework', dueDate: addDays(today, 4), dueTime: '08:00', priority: 2, estimatedMinutes: 120, difficulty: 4, progress: 0.4 },
-    { ...base, courseId: algebra.id, title: 'Unit 5 exam prep', type: 'exam', dueDate: addDays(today, 4), dueTime: '09:00', priority: 3, estimatedMinutes: 150, difficulty: 5, progress: 0.3 },
-    { ...base, courseId: lit.id, title: 'Read chapter 7', type: 'reading', dueDate: addDays(today, 8), priority: 1, estimatedMinutes: 180, difficulty: 2, progress: 0.2 },
-    { ...base, courseId: chem.id, title: 'Unit test review', type: 'homework', dueDate: addDays(today, 10), priority: 2, estimatedMinutes: 120, difficulty: 3 },
+    { ...base, courseId: chem.id, title: 'Lab report', type: 'project', dueDate: schoolDay(addDays(today, 3)), dueTime: '09:00', priority: 3, estimatedMinutes: 90, difficulty: 3, progress: 0.15 },
+    { ...base, courseId: lit.id, title: 'Essay draft 2', type: 'homework', dueDate: schoolDay(addDays(today, 4)), dueTime: '08:00', priority: 2, estimatedMinutes: 120, difficulty: 4, progress: 0.4 },
+    { ...base, courseId: algebra.id, title: 'Unit 5 exam', type: 'exam', dueDate: schoolDay(addDays(today, 4)), dueTime: '09:00', priority: 3, estimatedMinutes: 150, difficulty: 5, progress: 0.3 },
+    { ...base, courseId: lit.id, title: 'Read chapter 7', type: 'reading', dueDate: schoolDay(addDays(today, 8)), priority: 1, estimatedMinutes: 180, difficulty: 2, progress: 0.2 },
+    { ...base, courseId: chem.id, title: 'Unit test review', type: 'homework', dueDate: schoolDay(addDays(today, 10)), priority: 2, estimatedMinutes: 120, difficulty: 3 },
     { ...base, courseId: algebra.id, title: 'Practice test', type: 'homework', dueDate: addDays(today, -1), priority: 2, estimatedMinutes: 60, status: 'done', completedAt: Date.now() - 86400000 },
   ]
   for (const item of items) await repo.assignments.put(item)

@@ -31,7 +31,7 @@ export function HobbyCard({ hobby, data, onDetails }: { hobby: Hobby; data: Hobb
 
       <div className="progress">
         <div className="bar"><i style={{ width: `${pct}%` }} /></div>
-        <span className="sub">{progress.value} of {progress.target} {progress.unit} this week</span>
+        <span className="sub">{progress.value} of {progress.target} {progress.unit} this week (since {weekStart === 1 ? 'Monday' : 'Sunday'})</span>
       </div>
 
       <HeatGrid cells={heatCells(mine, today, 20, weekStart)} today={today} label={`${hobby.name} last 20 weeks`} columns={20} />

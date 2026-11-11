@@ -41,9 +41,22 @@ describe('suggestPlan', () => {
     expect(r.blocks.map((b) => [b.date, b.minutes])).toEqual([['2026-11-12', 60], ['2026-11-13', 30]])
   })
 
-  it('does not plan done assignments and plans overdue work for today', () => {
+  it('never schedules done or overdue work, and flags overdue items to catch up on', () => {
     const r = suggestPlan({ assignments: [mk('done', '2026-11-12', 60, { status: 'done' }), mk('old', '2026-11-08', 45)], existing: [], today })
-    expect(r.blocks.map((b) => [b.assignmentId, b.date])).toEqual([['old', '2026-11-10']])
+    expect(r.blocks).toEqual([])
+    expect(r.overdue).toEqual(['old'])
+  })
+
+  it('treats something due earlier today as overdue once its time has passed', () => {
+    const r = suggestPlan({ assignments: [mk('quiz', '2026-11-10', 45, { dueTime: '09:00' }), mk('tonight', '2026-11-10', 30, { dueTime: '20:00' })], existing: [], today, now: new Date(2026, 10, 10, 12) })
+    expect(r.overdue).toEqual(['quiz'])
+    expect(r.blocks.map((b) => [b.assignmentId, b.date])).toEqual([['tonight', '2026-11-10']])
+  })
+
+  it('never puts a block after the due date, and finishes the day before a morning deadline', () => {
+    const r = suggestPlan({ assignments: [mk('lab', '2026-11-13', 150, { dueTime: '09:00' })], existing: [], today })
+    expect(r.blocks.map((b) => b.date)).toEqual(['2026-11-10', '2026-11-11', '2026-11-12'])
+    expect(r.blocks.every((b) => b.date < '2026-11-13')).toBe(true)
   })
 
   it('marks exam blocks as exam prep and warns about overloaded days', () => {
@@ -80,6 +93,12 @@ describe('no scrap blocks', () => {
 
   it('still plans a small task on its own', () => {
     expect(suggestPlan({ assignments: [mk('tiny', '2026-11-11', 10)], existing: [], today }).blocks.map((b) => b.minutes)).toEqual([10])
+  })
+
+  it('folds a small tail into the block even when the day is otherwise full', () => {
+    // 60 minute days: 70 minutes becomes one 70 minute block, not 60 + 10
+    const r = suggestPlan({ assignments: [mk('a', '2026-11-12', 70)], existing: [], today, perDay: 60 })
+    expect(r.blocks.map((b) => b.minutes)).toEqual([70])
   })
 })
 
