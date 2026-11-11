@@ -13,6 +13,7 @@ import { computeStreak } from '../../domain/streaks'
 import { HabitsTile } from '../life/HabitsTile'
 import { createPrepBlocks, markBlockDone } from '../plan/planActions'
 import { acceptSuggestion, usePlan } from '../plan/usePlan'
+import { ShortfallWarning } from '../plan/ShortfallWarning'
 import { PulseChart } from './PulseChart'
 
 function markDone(a: Assignment) {
@@ -82,6 +83,7 @@ export function TodayPage() {
         <h1>{dueToday.length === 0 ? 'Nothing due today.' : `${dueToday.length} due today.`}</h1>
         {late.length > 0 && <p><span className="tag-overdue">Overdue</span> {late.map((a) => a.title).join(', ')}. Catch up when you can, or mark it done below.</p>}
       </div>
+      <ShortfallWarning shortfalls={plan.shortfalls} assignments={assignments} today={today} />
 
       <div className="bento">
         <section className="tile glass hero span-6 row-2" aria-label="Next up">

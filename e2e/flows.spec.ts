@@ -253,3 +253,11 @@ test.describe('insights and settings', () => {
     await expect(page.getByLabel('Anthropic API key')).toBeVisible()
   })
 })
+
+test('names work that will not fit before it is due, on Plan and Today', async ({ page }) => {
+  await openApp(page, '#/week/plan')
+  await page.getByLabel('Time set aside per day (minutes)').fill('30')
+  await expect(page.getByRole('status').filter({ hasText: 'won’t fit before' }).first()).toContainText('Raise today’s time or start now.')
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Today' }).click()
+  await expect(page.getByText('won’t fit before').first()).toBeVisible()
+})

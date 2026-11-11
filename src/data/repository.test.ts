@@ -1,4 +1,5 @@
 import 'fake-indexeddb/auto'
+import Dexie from 'dexie'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createDexieRepository } from './dexieRepository'
 import { ensureSettings, seedSample } from './seed'
@@ -62,5 +63,20 @@ describe('dexie repository', () => {
 
   it('rejects unknown snapshot versions', async () => {
     await expect(repo.importAll({ version: 2 as never, exportedAt: 0, tables: {} })).rejects.toThrow()
+  })
+})
+
+describe('database upgrades', () => {
+  it('renames the old sample exam "Unit 5 exam prep" to "Unit 5 exam"', async () => {
+    const old = new Dexie('upgrade-test')
+    old.version(1).stores({ assignments: 'id, courseId, dueDate, status' })
+    await old.table('assignments').bulkPut([
+      { id: 'a', title: 'Unit 5 exam prep', type: 'exam', status: 'todo' },
+      { id: 'b', title: 'Unit 5 exam prep', type: 'homework', status: 'todo' },
+    ])
+    old.close()
+    const repo = createDexieRepository('upgrade-test')
+    expect((await repo.assignments.get('a'))?.title).toBe('Unit 5 exam')
+    expect((await repo.assignments.get('b'))?.title).toBe('Unit 5 exam prep')
   })
 })

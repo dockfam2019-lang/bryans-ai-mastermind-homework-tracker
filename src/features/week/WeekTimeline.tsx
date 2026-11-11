@@ -14,7 +14,8 @@ const hourSpan = (min: number) => `calc(${min / 60} * var(--hour))`
 const clampMin = (m: number) => Math.min(Math.max(m, START_H * 60), END_H * 60)
 
 /**
- * One flowing week: days share an hour grid, classes are soft tinted blocks, timed due dates are flags,
+ * One flowing week: days share an hour grid, classes are soft tinted blocks, due items sit in the top lane
+ * (timed ones also get a thin tick at their due time),
  * and suggested study time appears as dashed ghost blocks at real free times. One tap plans one.
  */
 export function WeekTimeline({ days, today, now, courses, assignments, blocks, suggestions, settings, loadOf, maxLoad }: {
@@ -48,7 +49,7 @@ export function WeekTimeline({ days, today, now, courses, assignments, blocks, s
         const load = loadOf(d)
         const classes = classesOn(courses, d, settings.rotationStart)
         const due = assignments.filter((a) => a.status !== 'done' && a.dueDate === d)
-        const timedDue = due.filter((a) => a.dueTime)
+        const timedDue = due.filter((a) => a.dueTime).sort((x, y) => x.dueTime!.localeCompare(y.dueTime!))
         const untimedDue = due.filter((a) => !a.dueTime)
         const dayBlocks = blocks.filter((b) => b.date === d && (b.state === 'accepted' || b.state === 'done'))
         const timedBlocks = dayBlocks.filter((b) => b.start)
@@ -62,9 +63,10 @@ export function WeekTimeline({ days, today, now, courses, assignments, blocks, s
               <i className="glow" role="img" aria-label={`About ${load} minutes of work`} style={{ opacity: load === 0 ? 0.12 : 0.35 + Math.min(1, load / maxLoad) * 0.65, width: `${30 + Math.min(1, load / maxLoad) * 70}%` }} />
             </header>
             <div className="tlane">
-              {untimedDue.map((a) => (
-                <span key={a.id} className={`chip due${itemStatus(a, now) === 'overdue' ? ' late' : ''}`} style={{ ['--c' as string]: courseOf(a)?.color }} title={`${a.title}, due`}>
-                  {itemStatus(a, now) === 'overdue' && <b className="tag-overdue">Overdue </b>}{a.title}
+              {/* due items live in the lane, earliest first, so they never sit on top of a class or each other */}
+              {[...timedDue, ...untimedDue].map((a) => (
+                <span key={a.id} className={`chip due${itemStatus(a, now) === 'overdue' ? ' late' : ''}`} style={{ ['--c' as string]: courseOf(a)?.color }} title={`${a.title}, due${a.dueTime ? ` ${formatTime(a.dueTime)}` : ''}`}>
+                  {itemStatus(a, now) === 'overdue' && <b className="tag-overdue">Overdue </b>}{a.dueTime && <small className="mono">Due {formatTime(a.dueTime)} · </small>}{a.title}
                 </span>
               ))}
               {loose.map((b) => <span key={b.id} className={`chip study${b.state === 'done' ? ' done' : ''}`} title={`${titleOf(b.assignmentId, b.label)}, ${b.minutes} min`}>{b.minutes}m · {titleOf(b.assignmentId, b.label)}</span>)}
@@ -91,15 +93,14 @@ export function WeekTimeline({ days, today, now, courses, assignments, blocks, s
                 const start = clampMin(minutesOf(s.start!))
                 const title = titleOf(s.assignmentId, s.label)
                 return (
-                  <button key={s.key} type="button" className={`tblock ghost${s.minutes < 40 ? ' short' : ''}`} style={{ top: hourOffset(start), height: hourSpan(Math.max(26, s.minutes)) }} onClick={() => acceptSuggestion(s, title)} title={`Suggested: ${title}, ${formatTime(s.start!)}, ${s.minutes} min. Tap to plan it.`}>
+                  <button key={s.key} type="button" className={`tblock ghost${s.minutes < 60 ? ' short' : ''}`} style={{ top: hourOffset(start), height: hourSpan(Math.max(30, s.minutes)) }} onClick={() => acceptSuggestion(s, title)} title={`Suggested: ${title}, ${formatTime(s.start!)}, ${s.minutes} min. Tap to plan it.`}>
                     <b>+ {title}</b><span>{formatTime(s.start!)} · {s.minutes}m</span><span className="sr-only">, suggested for {DAY_SHORT[fd.getDay()]}. Add to plan.</span>
                   </button>
                 )
               })}
+              {/* a thin tick marks the due time on the grid; the name is in the lane above */}
               {timedDue.map((a) => (
-                <div key={a.id} className={`tflag${itemStatus(a, now) === 'overdue' ? ' late' : ''}`} style={{ top: hourOffset(clampMin(minutesOf(a.dueTime!))), ['--c' as string]: courseOf(a)?.color }}>
-                  <span>{itemStatus(a, now) === 'overdue' ? 'Overdue · ' : ''}{formatTime(a.dueTime!)} due</span><b>{a.title}</b>
-                </div>
+                <i key={a.id} className={`tdue${itemStatus(a, now) === 'overdue' ? ' late' : ''}`} aria-hidden="true" title={`${a.title}, due ${formatTime(a.dueTime!)}`} style={{ top: hourOffset(clampMin(minutesOf(a.dueTime!))), ['--c' as string]: courseOf(a)?.color }} />
               ))}
               {isToday && nowMin >= START_H * 60 && nowMin <= END_H * 60 && <div className="tnow" style={{ top: hourOffset(nowMin) }} aria-hidden="true" />}
             </div>

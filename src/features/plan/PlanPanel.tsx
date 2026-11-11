@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { repo } from '../../data'
 import { addDays, DAY_SHORT, formatHM, formatTime, fromLocalDate, MONTH_SHORT, relativeDay, toLocalDate } from '../../domain/dates'
 import type { Suggestion } from '../../domain/livePlan'
+import { remainingMinutes } from '../../domain/load'
 import { capacityFor, DEFAULT_STUDY_MINUTES } from '../../domain/scheduler'
 import type { StudyBlock } from '../../domain/types'
 import { showToast } from '../../ui/toast'
 import { startFocus } from '../focus/focusStore'
 import { OverdueBanner } from '../today/OverdueBanner'
+import { ShortfallWarning } from './ShortfallWarning'
 import { markBlockDone, removeBlock } from './planActions'
 import { acceptSuggestion, dismissSuggestion, usePlan } from './usePlan'
 
@@ -34,10 +36,14 @@ export function PlanPanel() {
     const title = titleOf(assignmentId, block?.label ?? suggestion?.label)
     const start = block?.start ?? suggestion?.start
     const minutes = block?.minutes ?? suggestion!.minutes
+    const a = assignments.find((x) => x.id === assignmentId)
+    const left = a ? remainingMinutes(a) : 0
+    // partly done work shows what is left, so a short total is not mistaken for missing time
+    const progress = suggestion && a?.estimatedMinutes && left < a.estimatedMinutes ? ` · ${left} of ${a.estimatedMinutes} min left` : ''
     return (
       <div className={`planblock ${block ? block.state : 'suggested'}`}>
         <i className="dot big" style={{ background: colorOf(assignmentId) }} />
-        <span className="title"><b>{title}</b><span className="sub">{start ? `${formatTime(start)} · ` : ''}{minutes} min{suggestion ? ' · suggested' : ''}{(block?.examPrep ?? suggestion?.examPrep) ? ' · exam prep' : ''}</span></span>
+        <span className="title"><b>{title}</b><span className="sub">{start ? `${formatTime(start)} · ` : ''}{minutes} min{suggestion ? ' · suggested' : ''}{progress}{(block?.examPrep ?? suggestion?.examPrep) ? ' · exam prep' : ''}</span></span>
         {suggestion && <button className="btn" type="button" onClick={() => acceptSuggestion(suggestion, title)}>Accept<span className="sr-only"> {title}</span></button>}
         {block?.state === 'accepted' && <button className="btn" type="button" onClick={() => startFocus({ type: 'assignment', id: assignmentId, title })}>Start<span className="sr-only"> {title}</span></button>}
         {block?.state === 'accepted' && <button className="btn ghost" type="button" onClick={() => markBlockDone(block)}>Done<span className="sr-only"> {title}</span></button>}
@@ -74,11 +80,7 @@ export function PlanPanel() {
           <b>Heads up.</b> {overloaded.slice(0, 3).map((d) => `${relativeDay(d.date, today)} looks heavy (about ${formatHM(d.needed)} of work, ${formatHM(d.capacity)} set aside)`).join('; ')}. Consider starting earlier or setting aside more time.
         </div>
       )}
-      {shortfalls.length > 0 && (
-        <div className="warn" role="status" style={{ marginBottom: 16 }}>
-          {shortfalls.slice(0, 3).map((s) => `${titleOf(s.assignmentId)} needs ${formatHM(s.minutes)} more than fits before it is due`).join('; ')}.
-        </div>
-      )}
+      <ShortfallWarning shortfalls={shortfalls} assignments={assignments} today={today} />
       {saved.length === 0 && suggestions.length === 0 && (
         <div className="empty"><p>Nothing to plan.</p><p className="sub">Add assignments with an estimate and suggestions appear here, on Week and on Today.</p></div>
       )}
@@ -96,7 +98,8 @@ export function PlanPanel() {
         return (
           <section key={d} className="planday" aria-label={d}>
             <header>
-              <b>{relativeDay(d, today)} <span className="sub">{DAY_SHORT[fd.getDay()]} {MONTH_SHORT[fd.getMonth()]} {fd.getDate()}</span></b>
+              {/* "Today Wed Nov 11", "Tomorrow Thu Nov 12", then "Fri Nov 13": the weekday appears once */}
+              <b>{d <= addDays(today, 1) ? relativeDay(d, today) : DAY_SHORT[fd.getDay()]} <span className="sub">{d <= addDays(today, 1) ? `${DAY_SHORT[fd.getDay()]} ` : ''}{MONTH_SHORT[fd.getMonth()]} {fd.getDate()}</span></b>
               <span className="sub">{formatHM(planned)} planned{proposed ? ` + ${formatHM(proposed)} suggested` : ''} of {formatHM(cap)}</span>
               <div className={`capbar${planned + proposed > cap ? ' over' : ''}`}><i style={{ width: `${Math.min(100, ((planned + proposed) / cap) * 100)}%` }} /></div>
             </header>

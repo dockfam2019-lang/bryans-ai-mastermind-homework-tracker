@@ -52,6 +52,11 @@ export class StudyboardDB extends Dexie {
   constructor(name = 'studyboard') {
     super(name)
     this.version(1).stores(SCHEMA)
+    // the sample exam was once called "Unit 5 exam prep"; the item is the exam itself
+    this.version(2).stores(SCHEMA).upgrade((tx) =>
+      tx.table('assignments').toCollection().modify((a: { title: string; type: string }) => {
+        if (a.type === 'exam' && a.title === 'Unit 5 exam prep') a.title = 'Unit 5 exam'
+      }))
   }
 }
 
