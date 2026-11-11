@@ -64,3 +64,22 @@ describe('plannedMinutes', () => {
     expect(plannedMinutes([block('a', today, 30, 'accepted'), block('b', today, 20, 'suggested'), block('c', today, 99, 'dismissed'), block('d', '2026-11-11', 15, 'accepted')], today)).toBe(50)
   })
 })
+
+describe('no scrap blocks', () => {
+  it('never fills a nearly full day with a few minutes', () => {
+    // the first item leaves 10 minutes of a 60 minute day; the second item needs 90
+    const r = suggestPlan({ assignments: [mk('a', '2026-11-10', 50), mk('b', '2026-11-12', 90)], existing: [], today, perDay: 60 })
+    expect(r.blocks.filter((b) => b.date === '2026-11-10').map((b) => b.assignmentId)).toEqual(['a'])
+    expect(r.blocks.every((b) => b.minutes >= 15)).toBe(true)
+  })
+
+  it('folds a short leftover into the block instead of a separate one', () => {
+    const r = suggestPlan({ assignments: [mk('a', '2026-11-12', 70)], existing: [], today })
+    expect(r.blocks.map((b) => b.minutes)).toEqual([70])
+  })
+
+  it('still plans a small task on its own', () => {
+    expect(suggestPlan({ assignments: [mk('tiny', '2026-11-11', 10)], existing: [], today }).blocks.map((b) => b.minutes)).toEqual([10])
+  })
+})
+

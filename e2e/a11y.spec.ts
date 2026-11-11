@@ -6,6 +6,8 @@ const PAGES = ['#/today', '#/week', '#/week/month', '#/week/plan', '#/school', '
 
 for (const theme of ['dark', 'light'] as const) {
   test(`no serious accessibility violations (${theme})`, async ({ page }) => {
+    // check colours at rest, not halfway through an entrance animation
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     await openApp(page, '#/settings')
     await page.getByRole('group', { name: 'Theme' }).getByRole('button', { name: theme === 'dark' ? 'Dark' : 'Light' }).click()
     for (const hash of PAGES) {

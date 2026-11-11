@@ -9,6 +9,7 @@
   --fill: rgba(255, 255, 255, 0.06);
   --fill-strong: rgba(255, 255, 255, 0.1);
   --line: rgba(255, 255, 255, 0.14);
+  --hairline: rgba(255, 255, 255, 0.06);
   --glass: rgba(255, 255, 255, 0.1);
   --glass-line: rgba(255, 255, 255, 0.24);
   --solid-glass: rgba(24, 27, 36, 0.94);
@@ -34,6 +35,7 @@
   --fill: rgba(20, 23, 28, 0.05);
   --fill-strong: rgba(20, 23, 28, 0.08);
   --line: rgba(20, 23, 28, 0.14);
+  --hairline: rgba(20, 23, 28, 0.07);
   --glass: rgba(255, 255, 255, 0.62);
   --glass-line: rgba(255, 255, 255, 0.9);
   --solid-glass: rgba(255, 255, 255, 0.96);
@@ -317,3 +319,84 @@ table.review td { padding: 4px; } table.review input, table.review select { padd
 input[type='checkbox'], input[type='radio'] { flex: none !important; min-width: 0 !important; }
 .filters label.inline { align-items: center; flex: none; }
 .hobbyhead { flex-wrap: wrap; } .hobbyhead .streak { flex: none; } .hobbyhead .streak .mono { white-space: nowrap; display: block; }
+
+/* ---------- softer, smoother surfaces (less boxy, fewer hard edges) ---------- */
+:root { --radius: 28px; }
+.tile {
+  border: 1px solid var(--hairline);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text) 6%, transparent), color-mix(in srgb, var(--text) 2.5%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent), 0 18px 40px -28px rgba(0, 0, 0, 0.6);
+}
+.tile.glass { border-color: var(--glass-line); }
+.btn.ghost { border: 0; background: var(--fill-strong); }
+.btn.ghost:hover { background: color-mix(in srgb, var(--text) 14%, transparent); }
+input, select, textarea { border-color: transparent; background: var(--fill-strong); border-radius: 14px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 1px; }
+.list li { border-top-color: var(--hairline); }
+.tabs { gap: 4px; }
+.tabs a { border: 0; background: transparent; color: var(--text); }
+.tabs a:hover { background: var(--fill); }
+.tabs a[aria-current='page'] { background: var(--fill-strong); color: var(--text); border: 0; }
+.empty { border: 0; background: var(--fill); }
+.daycol, .mcell { border-color: var(--hairline); }
+
+@media (prefers-reduced-motion: no-preference) {
+  main > * { animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  main > *:nth-child(2) { animation-delay: 0.04s; } main > *:nth-child(3) { animation-delay: 0.08s; } main > *:nth-child(4) { animation-delay: 0.12s; }
+  .tile { transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s; }
+  .tile:hover { transform: translateY(-2px); }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+/* ---------- week timeline ---------- */
+.swipe { touch-action: pan-y; overflow-x: clip; min-width: 0; } /* the timeline scrolls inside itself; never widen the page */
+.timeline {
+  --hour: 46px;
+  display: grid;
+  grid-template-columns: 48px repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text) 4%, transparent), transparent 70%);
+  padding: 4px 6px 18px 0;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.tgutter, .tday { display: grid; grid-row: 1 / 4; grid-template-rows: subgrid; min-width: 0; }
+.tday { scroll-snap-align: start; border-radius: 22px; }
+.tday + .tday { box-shadow: inset 1px 0 0 var(--hairline); }
+.tday.is-today { background: radial-gradient(140% 50% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%); box-shadow: none; }
+.thead { padding: 14px 10px 10px; display: grid; gap: 2px; align-content: end; }
+.thead b { font-size: clamp(1.4rem, 2.4vw, 2rem); line-height: 1; }
+.tday.is-today .thead b { color: var(--accent); }
+.tday.is-past .thead b { color: var(--muted); }
+.thead .glow { display: block; height: 3px; border-radius: 3px; margin-top: 8px; background: linear-gradient(90deg, var(--accent), transparent); }
+.tlane { padding: 4px 6px 10px; display: flex; flex-direction: column; gap: 4px; }
+.tbody { position: relative; height: calc(15 * var(--hour)); background: repeating-linear-gradient(to bottom, var(--hairline) 0 1px, transparent 1px var(--hour)); }
+.tgutter .tbody { background: none; }
+.tgutter .tbody span { position: absolute; right: 8px; transform: translateY(-50%); font: 0.62rem var(--font-mono); color: var(--muted); }
+.tblock { position: absolute; left: 5px; right: 5px; border-radius: 12px; padding: 6px 8px; display: grid; align-content: start; gap: 1px; overflow: hidden; font-size: 0.78rem; line-height: 1.2;
+  background: color-mix(in srgb, var(--c, var(--accent-2)) 20%, var(--bg)); box-shadow: inset 3px 0 0 var(--c, var(--accent-2)); }
+.tblock b { font-weight: 600; } .tblock span { font: 0.62rem var(--font-mono); color: var(--text); opacity: 1; }
+.tblock.study { --c: var(--accent-3); }
+.tflag { position: absolute; left: 5px; right: 5px; transform: translateY(-50%); z-index: 2; border-radius: 10px; padding: 4px 8px; background: var(--bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 70%, transparent), 0 6px 18px -8px rgba(0, 0, 0, 0.7); font-size: 0.74rem; display: grid; }
+.tflag span { font: 0.6rem var(--font-mono); color: var(--text); text-transform: uppercase; letter-spacing: 0.04em; }
+.tnow { position: absolute; left: 0; right: 0; height: 2px; background: var(--warm); z-index: 3; box-shadow: 0 0 12px var(--warm); }
+.tnow::before { content: ''; position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--warm); }
+.chip { display: block; border-radius: 10px; padding: 5px 8px; font-size: 0.74rem; line-height: 1.25; background: var(--fill-strong); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.due { box-shadow: inset 3px 0 0 var(--c, var(--accent)); }
+.chip.study { background: color-mix(in srgb, var(--accent-3) 22%, var(--bg)); }
+.chip.study.done { text-decoration: line-through; }
+.chip.ghost { font: inherit; font-size: 0.74rem; text-align: left; cursor: pointer; background: transparent; border: 1px dashed color-mix(in srgb, var(--text) 40%, transparent); }
+.chip.ghost:hover { background: var(--fill-strong); border-style: solid; }
+@media (max-width: 900px) {
+  .timeline { grid-template-columns: 40px repeat(7, minmax(150px, 46vw)); scroll-padding-inline-start: 40px; }
+  .tgutter { position: sticky; left: 0; z-index: 4; background: var(--bg); }
+}
+
+.timeline { position: relative; }
+.chip.more { text-decoration: none; color: var(--muted); background: transparent; padding-left: 4px; }
+.chip.more:hover { color: var(--text); }
+.pager { display: inline-flex; gap: 4px; background: var(--fill); border-radius: 999px; padding: 3px; }
+.pager .btn { padding: 8px 14px; background: transparent; }
+.pager .btn:hover { background: var(--fill-strong); }
+@media (max-width: 640px) { .tabs .grow { display: none; } .pager { margin-left: auto; } }

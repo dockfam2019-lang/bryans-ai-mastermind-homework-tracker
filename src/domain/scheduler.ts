@@ -57,9 +57,11 @@ export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBl
     for (let d = today; d <= end && remaining > 0; d = addDays(d, 1)) {
       if (dismissed.has(`${a.id}:${d}`) || alreadyPlanned.has(`${a.id}:${d}`)) continue
       const avail = capacityFor(d, perDay) - (used.get(d) ?? 0)
-      if (avail < MIN_BLOCK && remaining > MIN_BLOCK) continue
-      const minutes = Math.min(remaining, MAX_BLOCK, Math.max(avail, 0))
-      if (minutes <= 0) continue
+      let minutes = Math.min(remaining, MAX_BLOCK, Math.max(avail, 0))
+      // no scraps: a block is at least 15 minutes (or the whole rest, if less is left)
+      if (minutes < Math.min(remaining, MIN_BLOCK)) continue
+      // a leftover under 15 minutes is folded into this block instead of becoming its own
+      if (remaining - minutes > 0 && remaining - minutes < MIN_BLOCK && avail >= remaining) minutes = remaining
       blocks.push({ assignmentId: a.id, date: d, minutes, state: 'suggested', examPrep: a.type === 'exam' || undefined })
       used.set(d, (used.get(d) ?? 0) + minutes)
       remaining -= minutes
