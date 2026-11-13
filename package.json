@@ -13,7 +13,8 @@
     "gen-icons": "node scripts/gen-icons.mjs",
     "e2e": "playwright test",
     "screenshots": "SCREENSHOTS=1 playwright test e2e/screenshots.spec.ts",
-    "deploy": "bash scripts/deploy-pages.sh"
+    "deploy": "bash scripts/deploy-pages.sh",
+    "deploy:cloudflare": "vite build && wrangler pages deploy dist --project-name studyboard --branch main"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

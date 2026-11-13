@@ -1,5 +1,7 @@
 # Studyboard
 
+**Live:** https://studyboard-e7t.pages.dev (installable on your phone; your data stays in your own browser)
+
 A homework planner and hobby tracker in one app. It installs on your phone or laptop as a web app, works offline, needs no account, and keeps your data on your device.
 
 Built for Bryan's AI Mastermind. The plan, spec, research and design history are in [`ROADMAP.md`](ROADMAP.md) and [`docs/`](docs/).
