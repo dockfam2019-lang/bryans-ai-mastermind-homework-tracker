@@ -98,19 +98,25 @@ export function suggestPlan(args: { assignments: Assignment[]; existing: StudyBl
     }
 
     const queue = chunksFor(remaining)
+    const whole = remaining < MIN_BLOCK // a small task keeps its one short block
     let short = 0
     while (queue.length) {
       const c = queue.shift()!
       let done = false
       // 1. a whole chunk on the earliest day this item does not use yet
-      for (const d of days) if (!mine.has(d) && free(d) >= c) { place(d, c); done = true; break }
-      // 2. or extend this item's block on an earlier day that still has room (merging, never a scrap)
+      for (const d of days) if (!mine.has(d) && free(d) >= c && (c >= MIN_BLOCK || whole)) { place(d, c); done = true; break }
+      // 2. or extend this item's block on a day that still has room (merging, never a scrap)
       if (!done) for (const d of days) if (mine.has(d) && free(d) >= c) { place(d, c); done = true; break }
-      // 3. or split across a day's leftover time, as long as both parts stay at least 25 minutes
+      // 3. or take whatever time is left on a day, so urgent work uses it before later work can.
+      //    A new block still has to be at least 25 minutes; the rest of the chunk goes back in the queue.
       if (!done) {
         for (const d of days) {
-          const room = free(d)
-          if (room >= MIN_BLOCK && c - room >= MIN_BLOCK) { place(d, room); queue.unshift(c - room); done = true; break }
+          const part = Math.min(free(d), c)
+          if (part <= 0 || (!mine.has(d) && part < MIN_BLOCK)) continue
+          place(d, part)
+          if (c > part) queue.unshift(c - part)
+          done = true
+          break
         }
       }
       if (!done) short += c

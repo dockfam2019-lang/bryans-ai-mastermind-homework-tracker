@@ -4,7 +4,8 @@ import type { Assignment } from '../../domain/types'
 
 /** "Sat 8am": the deadline, short. */
 function dueLabel(a: Assignment, today: string): string {
-  return `${relativeDay(a.dueDate, today)}${a.dueTime ? ` ${formatTime(a.dueTime).replace(' ', '')}` : ''}`
+  const day = relativeDay(a.dueDate, today)
+  return `${day === 'Today' || day === 'Tomorrow' ? day.toLowerCase() : day}${a.dueTime ? ` ${formatTime(a.dueTime).replace(' ', '')}` : ''}`
 }
 
 /** Names each item that cannot get all its time before it is due, so minutes are never dropped silently. */

@@ -150,6 +150,23 @@ describe('the sample week (today Wed Nov 11, 2:25 pm; 120 minutes on weekdays, 9
   })
 })
 
+describe('the sample week on Friday afternoon (essay and exam due Saturday morning)', () => {
+  const seeded = [
+    mk('Essay draft 2', '2026-11-14', 120, { dueTime: '08:00', progress: 0.4 }),
+    mk('Unit 5 exam', '2026-11-14', 150, { dueTime: '09:00', type: 'exam', priority: 3, progress: 0.3 }),
+    mk('Read chapter 7', '2026-11-18', 180, { type: 'reading', priority: 1, progress: 0.2 }),
+  ]
+  const r = suggestPlan({ assignments: seeded, existing: [], today: '2026-11-13', now: new Date(2026, 10, 13, 13, 43), perDay: 120 })
+
+  it('spends all of today on the urgent items and only warns about what truly does not fit', () => {
+    const todays = r.blocks.filter((b) => b.date === '2026-11-13')
+    expect(todays.reduce((s, b) => s + b.minutes, 0)).toBe(120)
+    expect(todays.map((b) => b.assignmentId).sort()).toEqual(['Essay draft 2', 'Unit 5 exam'])
+    expect(r.shortfalls).toEqual([{ assignmentId: 'Unit 5 exam', minutes: 72 + 105 - 120 }])
+    expect(r.blocks.every((b) => b.minutes >= MIN_BLOCK)).toBe(true)
+  })
+})
+
 describe('plannedMinutes', () => {
   it('sums non-dismissed blocks for a day', () => {
     expect(plannedMinutes([block('a', today, 30, 'accepted'), block('b', today, 20, 'suggested'), block('c', today, 99, 'dismissed'), block('d', '2026-11-11', 15, 'accepted')], today)).toBe(50)

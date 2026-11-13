@@ -71,7 +71,9 @@ export function TodayPage() {
   const countdown = nextAt ? countdownWords(nextAt.getTime() - now.getTime()) : ''
   // the big text always says when: "2:10 pm" today, otherwise the day ("Fri") with the time beside it
   const isToday = next?.dueDate === today
-  const timeBig = next ? (isToday ? (next.dueTime ? formatTime(next.dueTime).split(' ')[0] : 'Today') : relativeDay(next.dueDate, today)) : ''
+  // the big word stays short ("Sat", "Nov 18"); the line above already says "due tomorrow"
+  const shortDay = (date: string) => { const r = relativeDay(date, today); return r === 'Tomorrow' ? DAY_SHORT[fromLocalDate(date).getDay()] : r }
+  const timeBig = next ? (isToday ? (next.dueTime ? formatTime(next.dueTime).split(' ')[0] : 'Today') : shortDay(next.dueDate)) : ''
   const timeSuffix = next?.dueTime ? (isToday ? formatTime(next.dueTime).split(' ')[1] : formatTime(next.dueTime)) : ''
   // an exam item called "Unit 5 exam prep" counts down to the exam itself
   const examName = (title: string) => title.replace(/\s+prep$/i, '')
