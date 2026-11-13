@@ -116,6 +116,8 @@ test.describe('week and planning', () => {
   test('one tap on a suggestion plans it, and Undo removes it', async ({ page }) => {
     await openApp(page, '#/week')
     const ghosts = page.locator('.tblock.ghost, .chip.ghost')
+    await expect(ghosts.first()).toBeVisible() // suggestions arrive after the data loads; count only once they are there
+    await page.waitForTimeout(200)
     const before = await ghosts.count()
     await ghosts.first().click()
     await expect(page.getByRole('status')).toContainText('Planned')
